@@ -8,17 +8,30 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\Response;
 
 class AuthController extends Controller
 {
     public function register(Request $request) {
-
-        return User::create([
-            'name' => $request->input('name'),
-            'email' => $request->input('email'),
-            'password' => Hash::make($request->input('password')),
+        $validator = Validator::make($request->all(),[
+            'name' => 'required|string|max:32',
+            'email' => 'required|email|max:32|unique:'.User::class,
+            'password' => 'required|min:8',
         ]);
+
+        if($validator->fails()) {
+            return response()->json([
+                'status' => 422,
+                'errors' => $validator->messages()
+            ], 422);
+        } else {
+            return User::create([
+                'name' => $request->input('name'),
+                'email' => $request->input('email'),
+                'password' => Hash::make($request->input('password')),
+            ]);
+        }
 
     }
 
@@ -29,9 +42,9 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $user = Auth::user();
+        //$user = Auth::user();
 
-        $token = $user->createToken('token')->plainTextToken;
+        $token = Auth::user()->createToken('token')->plainTextToken;
 
         $cookie = cookie('jwt', $token, 60 * 24);
 
