@@ -26,11 +26,18 @@ class AuthController extends Controller
                 'errors' => $validator->messages()
             ], 422);
         } else {
-            return User::create([
+            $user = User::create([
                 'name' => $request->input('name'),
                 'email' => $request->input('email'),
                 'password' => Hash::make($request->input('password')),
             ]);
+        }
+
+        if($user) {
+            return response()->json([
+                'message' => 'Success',
+                'data' => $user
+            ], 200);
         }
 
     }
