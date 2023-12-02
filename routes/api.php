@@ -5,7 +5,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\AuthController;
 use App\Http\Controllers\api\ItemController;
+use App\Http\Controllers\api\RequestController;
 use App\Http\Controllers\Api\StudentController;
+use App\Http\Controllers\Api\RequestCommunicationController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -17,17 +19,22 @@ use App\Http\Controllers\Api\StudentController;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
-
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('user', [AuthController::class, 'user']);
     Route::post('logout', [AuthController::class, 'logout']);
+
+    //request item
+    Route::post('requests', [RequestController::class,'store']);
+
+    //get user request/s
+    Route::get('userrequest', [RequestController::class,'indexUser']);
+
+    //request comm -As as User, I would like to follow up with my request status or any queries.
+    Route::post('requestcommunication', [RequestCommunicationController::class,'store']);
+    Route::get('requestcommunication/{id}', [RequestCommunicationController::class,'show']);
 });
 
 Route::middleware('auth:sanctum', 'is_admin')->group(function(){
@@ -46,4 +53,8 @@ Route::middleware('auth:sanctum', 'is_admin')->group(function(){
     Route::get('items/{id}/edit', [ItemController::class,'edit']);
     Route::put('items/{id}/edit', [ItemController::class,'update']);
     Route::delete('items/{id}/delete', [ItemController::class,'delete']);
+
+    Route::get('requests', [RequestController::class,'indexAdmin']);
 });
+
+

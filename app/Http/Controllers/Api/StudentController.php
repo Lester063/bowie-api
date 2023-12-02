@@ -13,7 +13,7 @@ class StudentController extends Controller
         $students = Student::all();
         return response()->json([
             'status' => 200,
-            'message' => $students 
+            'message' => $students
         ],200);
 
     }

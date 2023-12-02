@@ -22,7 +22,6 @@ class ItemController extends Controller
         $validator = Validator::make($request->all(),[
             'itemname' => 'required|string|max:191',
             'itemcode' => 'required|string|max:191',
-            'itemstatus' => 'required|string|max:191',
         ]);
 
         if($validator->fails()) {
@@ -34,7 +33,6 @@ class ItemController extends Controller
             $items = Item::create([
                 'itemname' => $request->itemname,
                 'itemcode' => $request->itemcode,
-                'itemstatus' => $request->itemstatus
             ]);
         }
 
