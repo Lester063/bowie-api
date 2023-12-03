@@ -22,7 +22,7 @@ class StudentController extends Controller
         $validator = Validator::make($request->all(),[
             'name' => 'required|string|max:191',
             'course' => 'required|string|max:191',
-            'email' => 'required|email|max:191',
+            'email' => 'required|email|max:191|unique:'.Student::class,
             'phone' => 'required|digits:11',
         ]);
 
