@@ -69,7 +69,7 @@ class ItemController extends Controller
     public function edit($id) {
         $item = Item::find($id);
 
-        if(!$student) {
+        if(!$item) {
             return response()->json([
                 'status' => 404,
                 'message' => 'Unable to find the item.'
@@ -94,7 +94,6 @@ class ItemController extends Controller
             $validator = Validator::make($request->all(),[
                 'itemname' => 'required|string|max:191',
                 'itemcode' => 'required|string|max:191',
-                'itemstatus' => 'required|string|max:191',
             ]);
             if($validator->fails()) {
                 return response()->json([
@@ -105,7 +104,6 @@ class ItemController extends Controller
                 $item->update([
                     'itemname' => $request->itemname,
                     'itemcode' => $request->itemcode,
-                    'itemstatus' => $request->itemstatus,
                 ]);
                 $newdata=Item::find($id);
                 return response()->json([

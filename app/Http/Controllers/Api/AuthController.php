@@ -46,8 +46,9 @@ class AuthController extends Controller
     public function login(Request $request) {
         if(!Auth::attempt($request->only('email', 'password'))) {
             return response([
-                'message' => 'Invalid Credentials'
-            ], 401);
+                'message' => 'Invalid Credentials',
+                'statuscode' => 422,
+            ]);
         }
 
         //$user = Auth::user();
@@ -58,6 +59,8 @@ class AuthController extends Controller
 
         return response([
             'message' => 'success',
+            'statuscode' => 200,
+            'is_admin' => Auth::user()->is_admin,
             'token' => $token
         ])->withCookie($cookie);
     }
