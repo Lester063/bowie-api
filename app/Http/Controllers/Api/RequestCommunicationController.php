@@ -14,7 +14,7 @@ class RequestCommunicationController extends Controller
 {
     public function store(Request $request) {
         $validator = Validator::make($request->all(),[
-            'idrequest' => 'required|string|exists:requests,id',
+            'idrequest' => 'required|string|exists:requests,id', //validates if idrequest does exist on requests table -id
             'message' => 'required|string|max:255',
         ]);
 
@@ -50,29 +50,37 @@ class RequestCommunicationController extends Controller
 
     public function show($id) {
         //add idrequester to reqcomm and validate if id is equal to Auth
-        $comms = RequestCommunication::where('idrequest', $id)->get();
-        $checkAuth = false;
-        foreach($comms as $comm) {
-            if($comm->idsender == Auth::id()) {
-                $checkAuth = true;
-            }
-        }
-
-        if($comms->count() < 1) {
+        $isExist = Requests::find($id);
+        if(!$isExist) {
             return response()->json([
-                'error' => 'Request does not exist.'
+                'message' => 'Unable to find the request id.'
             ], 422);
         }
         else {
-            if(!$checkAuth) {
+            $comms = RequestCommunication::where('idrequest', $id)->get();
+            $checkAuth = false;
+            foreach($comms as $comm) {
+                if($comm->idsender == Auth::id()) {
+                    $checkAuth = true;
+                }
+            }
+    
+            if($comms->count() < 1) {
                 return response()->json([
-                    'error' => 'You are not allowed to view the messages on this request.',
-                ], 422);
+                    'message' => 'No messages to fetch.'
+                ], 200);
             }
             else {
-                return response()->json([
-                    'data' => $comms,
-                ], 200);
+                if(!$checkAuth) {
+                    return response()->json([
+                        'message' => 'You are not allowed to view the messages on this request.',
+                    ], 422);
+                }
+                else {
+                    return response()->json([
+                        'message' => $comms,
+                    ], 200);
+                }
             }
         }
     }

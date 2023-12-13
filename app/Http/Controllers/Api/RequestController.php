@@ -21,18 +21,22 @@ class RequestController extends Controller
 
         return response()->json([
             'status' => 200,
-            'data' => $requests,
+            'message' => $requests,
         ], 200);
         
     }
 
     public function indexUser()
     {
-        $requests = Requests::where('idrequester', Auth::id())->get();
+        $requests = Requests::where('idrequester', Auth::id())
+        ->join('items', 'items.id', '=', 'requests.iditem')->get();
+
+        $aw = Requests::where('idrequester', Auth::id())
+        ->join('items', 'items.id', '=', 'requests.iditem')->select('*','requests.id as requestid')->get();
 
         return response()->json([
             'status' => 200,
-            'data' => $requests,
+            'message' => $aw,
         ], 200);
         
     }
@@ -53,11 +57,19 @@ class RequestController extends Controller
         } else {
             $getItem = Item::find($request->iditem);
             $isItemAvailable = $getItem->is_available;
+
+            $userRequestPendingCount = Requests::where('iditem', $request->iditem)->where('idrequester', $request->idrequester)->where('statusrequest', 'Pending')->count();
             if(!$isItemAvailable) {
                 return response()->json([
                     'status' => 422,
-                    'error' => 'Item is not available.',
+                    'message' => 'Item is not available.',
                 ], 422);
+            }
+            else if($userRequestPendingCount > 0){ //may need to add other statuses like 'Being Process'
+                return response()->json([
+                    'status' => 422,
+                    'message' => 'You have already requested this item.',
+                ], 400);
             }
             else {
                 $requestdata = Requests::create([

@@ -30,7 +30,7 @@ class AuthController extends Controller
                 'name' => $request->input('name'),
                 'email' => $request->input('email'),
                 'password' => Hash::make($request->input('password')),
-                'is_admin' => $request->input('is_admin'),
+                'is_admin' => $request->input('is_admin'), // need to recheck
             ]);
         }
 
@@ -61,6 +61,7 @@ class AuthController extends Controller
             'message' => 'success',
             'statuscode' => 200,
             'is_admin' => Auth::user()->is_admin,
+            'userid' => Auth::user()->id,
             'token' => $token
         ])->withCookie($cookie);
     }

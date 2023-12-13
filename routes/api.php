@@ -35,6 +35,9 @@ Route::middleware('auth:sanctum')->group(function () {
     //request comm -As as User, I would like to follow up with my request status or any queries.
     Route::post('requestcommunication', [RequestCommunicationController::class,'store']);
     Route::get('requestcommunication/{id}', [RequestCommunicationController::class,'show']);
+
+    //display items
+    Route::get('items', [ItemController::class,'index']);
 });
 
 Route::middleware('auth:sanctum', 'is_admin')->group(function(){
@@ -47,7 +50,6 @@ Route::middleware('auth:sanctum', 'is_admin')->group(function(){
     Route::delete('students/{id}/delete', [StudentController::class,'delete']);
 
 
-    Route::get('items', [ItemController::class,'index']);
     Route::post('items', [ItemController::class,'store']);
     Route::get('items/{id}', [ItemController::class,'show']);
     Route::get('items/{id}/edit', [ItemController::class,'edit']);
