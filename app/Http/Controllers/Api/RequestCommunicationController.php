@@ -50,8 +50,9 @@ class RequestCommunicationController extends Controller
 
     public function show($id) {
         //add idrequester to reqcomm and validate if id is equal to Auth
-        $isExist = Requests::find($id);
-        if(!$isExist) {
+        $getRequest = Requests::find($id);
+        $user = User::find(Auth::id());
+        if(!$getRequest) {
             return response()->json([
                 'message' => 'Unable to find the request id.'
             ], 422);
@@ -65,16 +66,16 @@ class RequestCommunicationController extends Controller
                 }
             }
     
-            if($comms->count() < 1) {
+            if(!$checkAuth && !$user->is_admin && $getRequest->idrequester != Auth::id()) {
                 return response()->json([
-                    'message' => 'No messages to fetch.'
-                ], 200);
+                    'message' => 'You are not allowed to view the messages on this request.',
+                ], 422);
             }
             else {
-                if(!$checkAuth) {
+                if($comms->count() < 1) {
                     return response()->json([
-                        'message' => 'You are not allowed to view the messages on this request.',
-                    ], 422);
+                        'message' => 'No messages to fetch.',
+                    ], 200);
                 }
                 else {
                     return response()->json([
