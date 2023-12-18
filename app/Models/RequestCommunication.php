@@ -14,4 +14,9 @@ class RequestCommunication extends Model
         'idsender',
         'message',
     ];
+
+    protected $hidden = [
+        'password',
+        'is_admin'
+    ];
 }

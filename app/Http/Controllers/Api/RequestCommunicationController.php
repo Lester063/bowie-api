@@ -58,7 +58,8 @@ class RequestCommunicationController extends Controller
             ], 422);
         }
         else {
-            $comms = RequestCommunication::where('idrequest', $id)->get();
+            $comms = RequestCommunication::where('idrequest', $id)
+            ->join('users','users.id', '=', 'request_communications.idsender')->get();
             $checkAuth = false;
             foreach($comms as $comm) {
                 if($comm->idsender == Auth::id()) {
