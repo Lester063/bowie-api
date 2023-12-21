@@ -30,7 +30,7 @@ class AuthController extends Controller
                 'name' => $request->input('name'),
                 'email' => $request->input('email'),
                 'password' => Hash::make($request->input('password')),
-                'is_admin' => $request->input('is_admin'), // need to recheck
+                'is_admin' => false, // new users are automatically not admin
             ]);
         }
 

@@ -29,11 +29,9 @@ class RequestController extends Controller
 
     public function indexUser()
     {
-        // $requests = Requests::where('idrequester', Auth::id())
-        // ->join('items', 'items.id', '=', 'requests.iditem')->get();
-
         $requests = Requests::where('idrequester', Auth::id())
-        ->join('items', 'items.id', '=', 'requests.iditem')->select('*','requests.id as id')->get();
+        ->join('items', 'items.id', '=', 'requests.iditem')
+        ->join('users','users.id','=','requests.idrequester')->select('*','requests.id as id')->get();
 
         return response()->json([
             'status' => 200,
