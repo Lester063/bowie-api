@@ -17,7 +17,7 @@ class RequestController extends Controller
     public function indexAdmin()
     {
 
-        $requests = Requests::all();
+        $requests = Requests::join('items', 'items.id', '=', 'requests.iditem')->select('*','requests.id as id')->get();
 
         return response()->json([
             'status' => 200,
@@ -28,15 +28,15 @@ class RequestController extends Controller
 
     public function indexUser()
     {
-        $requests = Requests::where('idrequester', Auth::id())
-        ->join('items', 'items.id', '=', 'requests.iditem')->get();
+        // $requests = Requests::where('idrequester', Auth::id())
+        // ->join('items', 'items.id', '=', 'requests.iditem')->get();
 
-        $aw = Requests::where('idrequester', Auth::id())
-        ->join('items', 'items.id', '=', 'requests.iditem')->select('*','requests.id as requestid')->get();
+        $requests = Requests::where('idrequester', Auth::id())
+        ->join('items', 'items.id', '=', 'requests.iditem')->select('*','requests.id as id')->get();
 
         return response()->json([
             'status' => 200,
-            'message' => $aw,
+            'message' => $requests,
         ], 200);
         
     }
@@ -117,4 +117,55 @@ class RequestController extends Controller
     {
         //
     }
+
+    public function actionRequest(Request $request, string $id)
+    {
+        $requests = Requests::find($id);
+        if(!$requests) {
+            return response()->json([
+                'message' => 'Unable to find the request.'
+            ],422);
+        } else {
+            $item = Item::find($requests->iditem);
+            if(!$item->is_available) {
+                return response()->json([
+                    'message' => 'Item is not available at the moment.'
+                ],422);
+            }
+            else {
+                if($request->action==='Approving') {
+                    $requests->update([
+                        'statusrequest' => 'Approved'
+                    ]);
+
+                    $item->update([
+                        'is_available' => false
+                    ]);
+
+                    $requestnewdata = Requests::find($id);
+                    return response()->json([
+                        'message' => 'Request was approved.',
+                        'data' => $requestnewdata
+                    ], 200);
+                }
+                else if($request->action==='Declining') {
+                    $requests->update([
+                        'statusrequest' => 'Declined'
+                    ]);
+                    
+                    $requestnewdata = Requests::find($id);
+                    return response()->json([
+                        'message' => 'Request was declined.',
+                        'data' => $requestnewdata
+                    ], 200);
+                }
+                else {
+                    return response()->json([
+                        'message' => 'Unidentified action.'
+                    ],422);
+                }
+            }
+        }
+    }
+
 }

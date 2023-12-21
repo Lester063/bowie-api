@@ -57,6 +57,9 @@ Route::middleware('auth:sanctum', 'is_admin')->group(function(){
     Route::delete('items/{id}/delete', [ItemController::class,'delete']);
 
     Route::get('requests', [RequestController::class,'indexAdmin']);
+
+    //request -admin
+    Route::put('actionrequest/{id}/edit', [RequestController::class,'actionRequest']);
 });
 
 

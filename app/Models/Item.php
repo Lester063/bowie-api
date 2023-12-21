@@ -14,6 +14,6 @@ class Item extends Model
     protected $fillable = [
         'itemname',
         'itemcode',
-        'itemstatus',
+        'is_available',
     ];
 }

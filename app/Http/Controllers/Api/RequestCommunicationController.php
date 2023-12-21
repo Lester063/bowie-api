@@ -39,11 +39,13 @@ class RequestCommunicationController extends Controller
                     'message' => $request->input('message'),
                     'idsender' => Auth::id(),
                 ]);
-    
+                
                 return response()->json([
                     'message' => 'Message sent successfully.',
+                    'sendername' => $user->name,
                     'data' => $sendmessage,
                 ], 200);
+
             }
         }
     }
@@ -59,7 +61,7 @@ class RequestCommunicationController extends Controller
         }
         else {
             $comms = RequestCommunication::where('idrequest', $id)
-            ->join('users','users.id', '=', 'request_communications.idsender')->get();
+            ->join('users','users.id', '=', 'request_communications.idsender')->select('*','request_communications.id as id')->get();
             $checkAuth = false;
             foreach($comms as $comm) {
                 if($comm->idsender == Auth::id()) {
@@ -73,16 +75,9 @@ class RequestCommunicationController extends Controller
                 ], 422);
             }
             else {
-                if($comms->count() < 1) {
-                    return response()->json([
-                        'message' => 'No messages to fetch.',
-                    ], 200);
-                }
-                else {
-                    return response()->json([
-                        'message' => $comms,
-                    ], 200);
-                }
+                return response()->json([
+                    'message' => $comms,
+                ], 200);
             }
         }
     }
