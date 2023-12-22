@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\AuthController;
 use App\Http\Controllers\api\ItemController;
 use App\Http\Controllers\api\RequestController;
-use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\RequestCommunicationController;
 /*
 |--------------------------------------------------------------------------
@@ -41,14 +40,6 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::middleware('auth:sanctum', 'is_admin')->group(function(){
-    //student endpoint
-    Route::get('students', [StudentController::class,'index']);
-    Route::post('students', [StudentController::class,'store']);
-    Route::get('students/{id}', [StudentController::class,'show']);
-    Route::get('students/{id}/edit', [StudentController::class,'edit']);
-    Route::put('students/{id}/edit', [StudentController::class,'update']);
-    Route::delete('students/{id}/delete', [StudentController::class,'delete']);
-
 
     Route::post('items', [ItemController::class,'store']);
     Route::get('items/{id}', [ItemController::class,'show']);
@@ -60,6 +51,7 @@ Route::middleware('auth:sanctum', 'is_admin')->group(function(){
 
     //request -admin
     Route::put('actionrequest/{id}/edit', [RequestController::class,'actionRequest']);
+
 });
 
 
