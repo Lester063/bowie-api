@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\api\AuthController;
 use App\Http\Controllers\api\ItemController;
+use App\Http\Controllers\api\ReturnController;
 use App\Http\Controllers\api\RequestController;
 use App\Http\Controllers\Api\RequestCommunicationController;
 /*
@@ -37,6 +38,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //display items
     Route::get('items', [ItemController::class,'index']);
+
+    //return item
+    Route::post('return', [ReturnController::class,'store']);
+    //return - user view
+    Route::get('userreturns', [ReturnController::class,'indexUser']);
 });
 
 Route::middleware('auth:sanctum', 'is_admin')->group(function(){
@@ -51,6 +57,12 @@ Route::middleware('auth:sanctum', 'is_admin')->group(function(){
 
     //request -admin
     Route::put('actionrequest/{id}/edit', [RequestController::class,'actionRequest']);
+
+
+    //return - approve 
+    Route::put('return/{id}/approve', [ReturnController::class,'approve']);
+    //return - admin view
+    Route::get('returns', [ReturnController::class,'indexAdmin']);
 
 });
 

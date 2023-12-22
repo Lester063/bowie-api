@@ -5,19 +5,22 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Requests extends Model
+class Returns extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'idrequester',
-        'iditem',
-        'statusrequest',
-        'isreturnsent'
+        'idrequest',
+        'idreturner',
+        'is_approve',
     ];
 
     protected $hidden = [
         'password',
-        'is_admin'
+        'is_admin',
+        'statusrequest',
+        'is_available',
+        'idrequester',
+        'iditem'
     ];
 }
