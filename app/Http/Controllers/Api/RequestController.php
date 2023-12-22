@@ -4,6 +4,7 @@ namespace App\Http\Controllers\api;
 
 use App\Models\Item;
 use App\Models\Requests;
+use App\Models\RequestCommunication;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +18,7 @@ class RequestController extends Controller
     public function indexAdmin()
     {
 
-        $requests = Requests::join('items', 'items.id', '=', 'requests.iditem')->select('*','requests.id as id')->get();
+        $requests = Requests::join('items', 'items.id', '=', 'requests.iditem')->join('users','users.id','=','requests.idrequester')->select('*','requests.id as id')->orderBy('requests.created_at','desc')->get();
 
         return response()->json([
             'status' => 200,
@@ -121,11 +122,18 @@ class RequestController extends Controller
     public function actionRequest(Request $request, string $id)
     {
         $requests = Requests::find($id);
+        $allrequests = Requests::where('iditem', $requests->iditem)->where('statusrequest', 'Pending')->get();
         if(!$requests) {
             return response()->json([
                 'message' => 'Unable to find the request.'
             ],422);
-        } else {
+        }
+        else if($requests->statusrequest === 'Closed') {
+            return response()->json([
+                'message' => 'Unable to make any action.'
+            ],422);
+        }
+        else {
             $item = Item::find($requests->iditem);
             if(!$item->is_available) {
                 return response()->json([
@@ -134,6 +142,20 @@ class RequestController extends Controller
             }
             else {
                 if($request->action==='Approving') {
+                    foreach($allrequests as $singlerequest){
+                        if($singlerequest->id !== $requests->id) {
+                            $singlerequest->update([
+                                'statusrequest' => 'Closed'
+                            ]);
+    
+                            RequestCommunication::create([
+                                'idrequest' => $singlerequest->id,
+                                'message' => 'The item you have requested has been processed to other User. Therefore, this request will be closed, thank you.',
+                                'idsender' => Auth::id(),
+                            ]);
+                        }
+                    }
+
                     $requests->update([
                         'statusrequest' => 'Approved'
                     ]);

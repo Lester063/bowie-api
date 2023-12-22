@@ -76,6 +76,7 @@ class RequestCommunicationController extends Controller
             }
             else {
                 return response()->json([
+                    'statusrequest' => $getRequest->statusrequest,
                     'message' => $comms,
                 ], 200);
             }

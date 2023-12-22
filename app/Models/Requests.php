@@ -14,4 +14,9 @@ class Requests extends Model
         'iditem',
         'statusrequest',
     ];
+
+    protected $hidden = [
+        'password',
+        'is_admin'
+    ];
 }
