@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('requests', function (Blueprint $table) {
+        Schema::create('returns', function (Blueprint $table) {
             $table->id();
-            $table->string('idrequester');
-            $table->string('iditem');
-            $table->string('statusrequest');
-            $table->boolean('isreturnsent')->default(false);
+            $table->string('idrequest');
+            $table->string('idreturner');
+            $table->boolean('is_approve');
             $table->timestamps();
         });
     }
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('requests');
+        Schema::dropIfExists('returns');
     }
 };

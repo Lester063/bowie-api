@@ -31,7 +31,8 @@ class RequestController extends Controller
     {
         $requests = Requests::where('idrequester', Auth::id())
         ->join('items', 'items.id', '=', 'requests.iditem')
-        ->join('users','users.id','=','requests.idrequester')->select('*','requests.id as id')->get();
+        ->join('users','users.id','=','requests.idrequester')
+        ->select('*','requests.id as id')->get();
 
         return response()->json([
             'status' => 200,
@@ -75,6 +76,7 @@ class RequestController extends Controller
                     'idrequester' => $request->input('idrequester'),
                     'iditem' => $request->input('iditem'),
                     'statusrequest' => $request->input('statusrequest'),
+                    'isreturnsent' => false,
                 ]);
     
                 return response()->json([
@@ -156,6 +158,12 @@ class RequestController extends Controller
 
                     $requests->update([
                         'statusrequest' => 'Approved'
+                    ]);
+
+                    RequestCommunication::create([
+                        'idrequest' => $id,
+                        'message' => 'Your request for this item has been approved.',
+                        'idsender' => Auth::id(),
                     ]);
 
                     $item->update([
