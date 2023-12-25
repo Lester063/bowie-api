@@ -161,6 +161,10 @@ class ReturnController extends Controller
                 $item->update([
                     'is_available' => true
                 ]);
+
+                $requests->update([
+                    'statusrequest' => 'Completed'
+                ]);
             }
 
             return response()->json([
