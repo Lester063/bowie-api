@@ -29,6 +29,7 @@ class RequestController extends Controller
 
     public function indexUser()
     {
+        //need to check, unable to get some request because the item is deleted, need to add is_deleted column in items table
         $requests = Requests::where('idrequester', Auth::id())
         ->join('items', 'items.id', '=', 'requests.iditem')
         ->join('users','users.id','=','requests.idrequester')

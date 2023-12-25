@@ -6,6 +6,7 @@ use App\Models\Item;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Requests;
 
 class ItemController extends Controller
 {
@@ -136,6 +137,23 @@ class ItemController extends Controller
                     'message' => 'Something went wrong.'
                 ],500);
             }
+        }
+    }
+
+    public function itemRequest($id) {
+        $item = Item::find($id);
+        $getItemRequest = Requests::where('iditem', $id)->get();
+
+        if($item) {
+            return response()->json([
+                'count' => $getItemRequest->count(),
+                'message' => $getItemRequest
+            ], 200);
+        }
+        else {
+            return response()->json([
+                'message' => 'Unable to find the item.'
+            ], 404);
         }
     }
 }
