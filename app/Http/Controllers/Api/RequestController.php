@@ -195,6 +195,11 @@ class RequestController extends Controller
                         'data' => $requestnewdata
                     ], 200);
                 }
+                else if($request->action==='Closing') {
+                    $requests->update([
+                        'statusrequest' => 'Closed'
+                    ]);
+                }
                 else {
                     return response()->json([
                         'message' => 'Unidentified action.'
