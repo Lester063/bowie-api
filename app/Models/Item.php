@@ -15,5 +15,6 @@ class Item extends Model
         'itemname',
         'itemcode',
         'is_available',
+        'is_deleted',
     ];
 }

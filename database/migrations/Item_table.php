@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('itemname');
             $table->string('itemcode');
             $table->boolean('is_available')->default(true);
+            $table->boolean('is_deleted')->default(false);
             $table->timestamps();
         });
     }

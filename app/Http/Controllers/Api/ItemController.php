@@ -11,7 +11,7 @@ use App\Models\Requests;
 class ItemController extends Controller
 {
     public function index() {
-        $items = Item::all();
+        $items = Item::all()->where('is_deleted', false);
         return response()->json([
             'status' => 200,
             'message' => $items
@@ -116,6 +116,7 @@ class ItemController extends Controller
     }
 
     public function delete($id) {
+        //add is_deleted column
         $item = Item::find($id);
         if(!$item) {
             return response()->json([
@@ -123,13 +124,15 @@ class ItemController extends Controller
                 'message' => 'Unable to find the item.'
             ], 404);
         } else {
-            $item->delete();
+            $item->update([
+                'is_deleted' => true
+            ]);
+
             if($item) {
-                $getAllItem = Item::all();
                 return response()->json([
                     'status' => 200,
                     'message' => 'Item has been deleted successfully.',
-                    'data' => $getAllItem
+                    'data' => $item
                 ],200);
             } else {
                 return response()->json([

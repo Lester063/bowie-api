@@ -124,6 +124,8 @@ class RequestController extends Controller
     {
         $requests = Requests::find($id);
         $allrequests = Requests::where('iditem', $requests->iditem)->where('statusrequest', 'Pending')->get();
+        $item = Item::find($requests->iditem);
+
         if(!$requests) {
             return response()->json([
                 'message' => 'Unable to find the request.'
@@ -132,6 +134,11 @@ class RequestController extends Controller
         else if($requests->statusrequest === 'Closed') {
             return response()->json([
                 'message' => 'Unable to make any action.'
+            ],422);
+        }
+        else if($item->is_deleted) {
+            return response()->json([
+                'message' => 'Item is deleted.'
             ],422);
         }
         else {
