@@ -14,7 +14,7 @@ class ItemController extends Controller
         $items = Item::all()->where('is_deleted', false);
         return response()->json([
             'status' => 200,
-            'message' => $items
+            'data' => $items
         ],200);
 
     }

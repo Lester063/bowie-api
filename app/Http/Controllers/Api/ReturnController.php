@@ -23,7 +23,7 @@ class ReturnController extends Controller
         ->select('*','returns.id as id')->get();
 
         return response()->json([
-            'message' => $returns
+            'data' => $returns
         ], 200);
     }
 
@@ -36,7 +36,7 @@ class ReturnController extends Controller
         ->select('*','returns.id as id')->get();
 
         return response()->json([
-            'message' => $returns
+            'data' => $returns
         ], 200);
     }
 
@@ -129,14 +129,6 @@ class ReturnController extends Controller
     public function approve(Request $request, string $id)
     {
         $return = Returns::find($id);
-        
-
-        //$returnwithjoin = Returns::where('returns.id', $id)->join('requests','requests.id','=','returns.idrequest')->select('*','returns.id as id')->get();
-        // return response()->json([
-        //     'data' => $returnwithjoin,
-        //     'item' => $item,
-        //     'iditem' => $item->id,
-        // ],200);
 
         if(!$return) {
             return response()->json([

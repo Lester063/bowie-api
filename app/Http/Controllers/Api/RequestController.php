@@ -22,7 +22,7 @@ class RequestController extends Controller
 
         return response()->json([
             'status' => 200,
-            'message' => $requests,
+            'data' => $requests,
         ], 200);
         
     }
@@ -37,7 +37,7 @@ class RequestController extends Controller
 
         return response()->json([
             'status' => 200,
-            'message' => $requests,
+            'data' => $requests,
         ], 200);
         
     }
