@@ -60,9 +60,7 @@ class AuthController extends Controller
         return response([
             'message' => 'success',
             'statuscode' => 200,
-            'is_admin' => Auth::user()->is_admin,
-            'userid' => Auth::user()->id,
-            'token' => $token
+            'data' => Auth::user()
         ])->withCookie($cookie);
     }
 
