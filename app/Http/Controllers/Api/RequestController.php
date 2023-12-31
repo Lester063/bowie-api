@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api;
 use App\Models\Item;
 use App\Models\Requests;
 use App\Models\RequestCommunication;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -174,6 +175,13 @@ class RequestController extends Controller
                         'idsender' => Auth::id(),
                     ]);
 
+                    Notification::create([
+                        'recipientUserId' => $requests->idrequester,
+                        'senderUserId' => Auth::id(),
+                        'type' => 'approve request',
+                        'isRead' => false,
+                    ]);
+
                     $item->update([
                         'is_available' => false
                     ]);
@@ -187,6 +195,13 @@ class RequestController extends Controller
                 else if($request->action==='Declining') {
                     $requests->update([
                         'statusrequest' => 'Declined'
+                    ]);
+
+                    Notification::create([
+                        'recipientUserId' => $requests->idrequester,
+                        'senderUserId' => Auth::id(),
+                        'type' => 'decline request',
+                        'isRead' => false,
                     ]);
                     
                     $requestnewdata = Requests::find($id);
