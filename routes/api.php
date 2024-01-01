@@ -21,6 +21,8 @@ use App\Http\Controllers\Api\RequestCommunicationController;
 
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
+//display items
+Route::get('items', [ItemController::class,'index']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('user', [AuthController::class, 'user']);
@@ -35,9 +37,6 @@ Route::middleware('auth:sanctum')->group(function () {
     //request comm -As as User, I would like to follow up with my request status or any queries.
     Route::post('requestcommunication', [RequestCommunicationController::class,'store']);
     Route::get('requestcommunication/{id}', [RequestCommunicationController::class,'show']);
-
-    //display items
-    Route::get('items', [ItemController::class,'index']);
 
     //return item
     Route::post('return', [ReturnController::class,'store']);

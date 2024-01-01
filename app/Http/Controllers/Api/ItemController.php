@@ -3,15 +3,16 @@
 namespace App\Http\Controllers\api;
 
 use App\Models\Item;
+use App\Models\Requests;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
-use App\Models\Requests;
 
 class ItemController extends Controller
 {
     public function index() {
-        $items = Item::all()->where('is_deleted', false);
+        $items = Item::where('is_deleted', false)->get();
         return response()->json([
             'status' => 200,
             'data' => $items
@@ -85,23 +86,35 @@ class ItemController extends Controller
 
     public function update(Request $request, int $id) {
         $item = Item::find($id);
+        $verifyCode = Item::where('itemcode', $request->itemcode)->where('id','!=',$id)->count();
 
         if(!$item) {
             return response()->json([
                 'status' => 404,
-                'message' => 'Unable to find the item.'
+                'errors' => 'Unable to find the item.'
             ], 404);
         } else {
             $validator = Validator::make($request->all(),[
                 'itemname' => 'required|string|max:191',
-                'itemcode' => 'required|string|max:191',
+                'itemcode' => 'required|string|max:191|',
             ]);
             if($validator->fails()) {
                 return response()->json([
                     'status' => 422,
                     'errors' => $validator->messages()
                 ], 422);
-            } else {
+            } 
+
+            else if($verifyCode > 0) {
+                return response()->json([
+                    'status' => 422,
+                    'errors' => [
+                        'itemcode' => 'Item code is already taken.'
+                    ],
+                ], 422);
+            }
+            
+            else {
                 $item->update([
                     'itemname' => $request->itemname,
                     'itemcode' => $request->itemcode,
@@ -109,6 +122,7 @@ class ItemController extends Controller
                 $newdata=Item::find($id);
                 return response()->json([
                     'status' => 200,
+                    'message' => 'Data has been updated successfully.',
                     'newdata' => $newdata
                 ], 200);
             }
@@ -145,12 +159,15 @@ class ItemController extends Controller
 
     public function itemRequest($id) {
         $item = Item::find($id);
-        $getItemRequest = Requests::where('iditem', $id)->get();
+        $getAllItemRequest = Requests::where('iditem', $id)->get();
+        $getPendingItemRequest = Requests::where('iditem', $id)->where('statusrequest', 'Pending')->get();
 
         if($item) {
             return response()->json([
-                'count' => $getItemRequest->count(),
-                'message' => $getItemRequest
+                'count' => $getAllItemRequest->count(),
+                'allitemrequest' => $getAllItemRequest,
+                'countpending' => $getPendingItemRequest->count(),
+                'pendingrequest' => $getPendingItemRequest,
             ], 200);
         }
         else {
