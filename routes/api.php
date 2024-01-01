@@ -8,6 +8,7 @@ use App\Http\Controllers\api\ItemController;
 use App\Http\Controllers\api\ReturnController;
 use App\Http\Controllers\api\RequestController;
 use App\Http\Controllers\Api\RequestCommunicationController;
+use App\Http\Controllers\Api\NotificationController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -42,6 +43,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('return', [ReturnController::class,'store']);
     //return - user view
     Route::get('userreturns', [ReturnController::class,'indexUser']);
+
+    //notifications
+    Route::get('notifications', [NotificationController::class,'userNotificationIndex']);
+    Route::put('notifications', [NotificationController::class,'readUnreadUserNotification']);
 });
 
 Route::middleware('auth:sanctum', 'is_admin')->group(function(){
