@@ -178,8 +178,9 @@ class RequestController extends Controller
                     Notification::create([
                         'recipientUserId' => $requests->idrequester,
                         'senderUserId' => Auth::id(),
-                        'type' => 'approve request',
+                        'type' => 'approve the request',
                         'isRead' => false,
+                        'typeValueID' => $id
                     ]);
 
                     $item->update([
@@ -200,8 +201,9 @@ class RequestController extends Controller
                     Notification::create([
                         'recipientUserId' => $requests->idrequester,
                         'senderUserId' => Auth::id(),
-                        'type' => 'decline request',
+                        'type' => 'decline the request',
                         'isRead' => false,
+                        'typeValueID' => $id
                     ]);
                     
                     $requestnewdata = Requests::find($id);

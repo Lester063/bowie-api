@@ -5,6 +5,7 @@ namespace App\Http\Controllers\api;
 use App\Models\Returns;
 use App\Models\Requests;
 use App\Models\Item;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -156,6 +157,14 @@ class ReturnController extends Controller
 
                 $requests->update([
                     'statusrequest' => 'Completed'
+                ]);
+
+                Notification::create([
+                    'recipientUserId' => $return->idreturner,
+                    'senderUserId' => Auth::id(),
+                    'type' => 'approve the return',
+                    'isRead' => false,
+                    'typeValueID' => $id
                 ]);
             }
 

@@ -47,6 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //notifications
     Route::get('notifications', [NotificationController::class,'userNotificationIndex']);
     Route::put('notifications', [NotificationController::class,'readUnreadUserNotification']);
+    Route::get('notifications/{id}', [NotificationController::class,'generateNotificationMessage']);
 });
 
 Route::middleware('auth:sanctum', 'is_admin')->group(function(){
