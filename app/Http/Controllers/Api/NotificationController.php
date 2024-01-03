@@ -14,10 +14,13 @@ use Illuminate\Support\Facades\Auth;
 class NotificationController extends Controller
 {
     public function userNotificationIndex() {
-        $getUserNotifications = Notification::where('recipientUserId', Auth::id())->get();
-
+        $getUserNotifications = Notification::where('recipientUserId', Auth::id())->latest()->get();
+        $readNotification = Notification::where('recipientUserId', Auth::id())->where('isRead', true)->count();
+        $unreadNotification = Notification::where('recipientUserId', Auth::id())->where('isRead', false)->count();
         return response()->json([
             'message' => 'Success',
+            'readnotification' => $readNotification,
+            'unreadnotification' => $unreadNotification,
             'data' => $getUserNotifications,
         ], 200);
 
@@ -29,7 +32,7 @@ class NotificationController extends Controller
             $requests = Requests::find($notification->typeValueID);
             $user = User::find($notification->senderUserId);
             $item = Item::find($requests->iditem);
-            $notificationmessage = 'Admin '.$user->name.' '. $notification->type.' of item with code '.$item->itemcode.'.';
+            $notificationmessage = $user->name.' '. $notification->type.' of item with code '.$item->itemcode.'.';
         }
 
         if($notification->type === 'approve the return') {
@@ -37,7 +40,7 @@ class NotificationController extends Controller
             $requests = Requests::find($return->idrequest);
             $user = User::find($notification->senderUserId);
             $item = Item::find($requests->iditem);
-            $notificationmessage = 'Admin '.$user->name.' '. $notification->type.' of the requested item with code '.$item->itemcode.'.';
+            $notificationmessage = $user->name.' '. $notification->type.' of the requested item with code '.$item->itemcode.'.';
         }
 
         return response()->json([

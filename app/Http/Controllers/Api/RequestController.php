@@ -19,7 +19,8 @@ class RequestController extends Controller
     public function indexAdmin()
     {
 
-        $requests = Requests::join('items', 'items.id', '=', 'requests.iditem')->join('users','users.id','=','requests.idrequester')->select('*','requests.id as id')->orderBy('requests.created_at','desc')->get();
+        $requests = Requests::join('items', 'items.id', '=', 'requests.iditem')->join('users','users.id','=','requests.idrequester')
+        ->select('*','requests.id as id')->orderBy('requests.created_at','desc')->get();
 
         return response()->json([
             'status' => 200,
@@ -34,7 +35,7 @@ class RequestController extends Controller
         $requests = Requests::where('idrequester', Auth::id())
         ->join('items', 'items.id', '=', 'requests.iditem')
         ->join('users','users.id','=','requests.idrequester')
-        ->select('*','requests.id as id')->get();
+        ->select('*','requests.id as id')->orderBy('requests.created_at','desc')->get();
 
         return response()->json([
             'status' => 200,
@@ -175,7 +176,7 @@ class RequestController extends Controller
                         'idsender' => Auth::id(),
                     ]);
 
-                    Notification::create([
+                    $notification = Notification::create([
                         'recipientUserId' => $requests->idrequester,
                         'senderUserId' => Auth::id(),
                         'type' => 'approve the request',
@@ -190,7 +191,8 @@ class RequestController extends Controller
                     $requestnewdata = Requests::find($id);
                     return response()->json([
                         'message' => 'Request was approved.',
-                        'data' => $requestnewdata
+                        'data' => $requestnewdata,
+                        'notification' => $notification
                     ], 200);
                 }
                 else if($request->action==='Declining') {
@@ -198,7 +200,7 @@ class RequestController extends Controller
                         'statusrequest' => 'Declined'
                     ]);
 
-                    Notification::create([
+                    $notification = Notification::create([
                         'recipientUserId' => $requests->idrequester,
                         'senderUserId' => Auth::id(),
                         'type' => 'decline the request',
@@ -209,7 +211,8 @@ class RequestController extends Controller
                     $requestnewdata = Requests::find($id);
                     return response()->json([
                         'message' => 'Request was declined.',
-                        'data' => $requestnewdata
+                        'data' => $requestnewdata,
+                        'notification' => $notification
                     ], 200);
                 }
                 else if($request->action==='Closing') {

@@ -28,6 +28,14 @@ io.on('connection', (socket) => {
         //socket.emit('sendChatToClient', message);
     });
 
+    socket.on('sendNotificationToServer', (message) => {
+        console.log(message);
+
+        // io.sockets.emit('sendChatToClient', message);
+        socket.broadcast.emit('sendNotificationToClient', message);
+        //socket.emit('sendChatToClient', message);
+    });
+
 
     socket.on('disconnect', (socket) => {
         console.log('Disconnect');
