@@ -17,6 +17,13 @@ class NotificationController extends Controller
         $getUserNotifications = Notification::where('recipientUserId', Auth::id())->latest()->get();
         $readNotification = Notification::where('recipientUserId', Auth::id())->where('isRead', true)->count();
         $unreadNotification = Notification::where('recipientUserId', Auth::id())->where('isRead', false)->count();
+
+        foreach($getUserNotifications as $userNotification) {
+            $getMessage = $this->generateNotificationMessage($userNotification->id);
+            $userNotification->update([
+                'notificationMessage' => $getMessage
+            ]);
+        }
         return response()->json([
             'message' => 'Success',
             'readnotification' => $readNotification,
@@ -43,9 +50,8 @@ class NotificationController extends Controller
             $notificationmessage = $user->name.' '. $notification->type.' of the requested item with code '.$item->itemcode.'.';
         }
 
-        return response()->json([
-            'notificationmessage' => $notificationmessage
-        ], 200);
+        return $notificationmessage;
+
     }
 
     public function readUnreadUserNotification() {

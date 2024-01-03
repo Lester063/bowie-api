@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('recipientUserId');
             $table->string('senderUserId');
             $table->string('type');
+            $table->string('notificationMessage');
             $table->string('typeValueID');
             $table->boolean('isRead')->default(false);
             $table->timestamps();
