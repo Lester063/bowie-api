@@ -6,6 +6,7 @@ use App\Models\Item;
 use App\Models\Requests;
 use App\Models\RequestCommunication;
 use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -151,6 +152,9 @@ class RequestController extends Controller
                 ],422);
             }
             else {
+
+                $approver = User::find(Auth::id());
+
                 if($request->action==='Approving') {
                     foreach($allrequests as $singlerequest){
                         if($singlerequest->id !== $requests->id) {
@@ -163,6 +167,19 @@ class RequestController extends Controller
                                 'message' => 'The item you have requested has been processed to other User. Therefore, this request will be closed, thank you.',
                                 'idsender' => Auth::id(),
                             ]);
+
+                            //unable to make a real time notif because we do not return a response each loop
+                            $type = 'close the request';
+                            $notificationMessage = $approver->name.' '.$type.' of the item with code '.$item->itemcode;
+                            $notification = Notification::create([
+                                'recipientUserId' => $singlerequest->idrequester,
+                                'senderUserId' => Auth::id(),
+                                'type' => $type,
+                                'notificationMessage' => $notificationMessage,
+                                'isRead' => false,
+                                'typeValueID' => $id
+                            ]);
+
                         }
                     }
 
@@ -175,11 +192,14 @@ class RequestController extends Controller
                         'message' => 'Your request for this item has been approved.',
                         'idsender' => Auth::id(),
                     ]);
+                    $type = 'approve the request';
+                    $notificationMessage = $approver->name.' '.$type.' of the item with code '.$item->itemcode;
 
                     $notification = Notification::create([
                         'recipientUserId' => $requests->idrequester,
                         'senderUserId' => Auth::id(),
-                        'type' => 'approve the request',
+                        'type' => $type,
+                        'notificationMessage' => $notificationMessage,
                         'isRead' => false,
                         'typeValueID' => $id
                     ]);
@@ -200,10 +220,14 @@ class RequestController extends Controller
                         'statusrequest' => 'Declined'
                     ]);
 
+                    $type = 'decline the request';
+                    $notificationMessage = $approver->name.' '.$type.' of the item with code '.$item->itemcode;
+
                     $notification = Notification::create([
                         'recipientUserId' => $requests->idrequester,
                         'senderUserId' => Auth::id(),
-                        'type' => 'decline the request',
+                        'type' => $type,
+                        'notificationMessage' => $notificationMessage,
                         'isRead' => false,
                         'typeValueID' => $id
                     ]);
@@ -219,6 +243,7 @@ class RequestController extends Controller
                     $requests->update([
                         'statusrequest' => 'Closed'
                     ]);
+
                 }
                 else {
                     return response()->json([

@@ -6,6 +6,7 @@ use App\Models\Returns;
 use App\Models\Requests;
 use App\Models\Item;
 use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -159,10 +160,15 @@ class ReturnController extends Controller
                     'statusrequest' => 'Completed'
                 ]);
 
+                $approver = User::find(Auth::id());
+                $type = 'approve the return';
+                $notificationMessage = $approver->name.' '.$type.' of the item with code '.$item->itemcode;
+
                 Notification::create([
                     'recipientUserId' => $return->idreturner,
                     'senderUserId' => Auth::id(),
-                    'type' => 'approve the return',
+                    'type' => $type,
+                    'notificationMessage' => $notificationMessage,
                     'isRead' => false,
                     'typeValueID' => $id
                 ]);
