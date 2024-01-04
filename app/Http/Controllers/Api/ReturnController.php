@@ -164,7 +164,7 @@ class ReturnController extends Controller
                 $type = 'approve the return';
                 $notificationMessage = $approver->name.' '.$type.' of the item with code '.$item->itemcode;
 
-                Notification::create([
+                $notification = Notification::create([
                     'recipientUserId' => $return->idreturner,
                     'senderUserId' => Auth::id(),
                     'type' => $type,
@@ -176,7 +176,8 @@ class ReturnController extends Controller
 
             return response()->json([
                 'message' => 'Request for return has been approved.',
-                'data' => $returnnewdata
+                'data' => $returnnewdata,
+                'notification' => $notification
             ], 200);
         }
     }
