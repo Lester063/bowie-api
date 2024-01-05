@@ -7,6 +7,7 @@ use App\Models\Requests;
 use App\Models\Notification;
 use App\Models\User;
 use App\Models\Returns;
+use App\Models\RequestCommunication;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -48,6 +49,14 @@ class NotificationController extends Controller
             $user = User::find($notification->senderUserId);
             $item = Item::find($requests->iditem);
             $notificationmessage = $user->name.' '. $notification->type.' of the requested item with code '.$item->itemcode.'.';
+        }
+
+        if($notification->type === 'sent a message') {
+            // $requestcomm = RequestCommunication::find($notification->typeValueID);
+            $requests = Requests::find($notification->typeValueID);
+            $user = User::find($notification->senderUserId);
+            $item = Item::find($requests->iditem);
+            $notificationmessage = $user->name.' '. $notification->type.' on the request item with id '.$requests->id.'.';
         }
 
         return $notificationmessage;

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\RequestCommunication;
 use App\Models\Requests;
 use App\Models\User;
+use App\Models\Notification;
 use Illuminate\Support\Facades\Auth;
 
 class RequestCommunicationController extends Controller
@@ -33,7 +34,70 @@ class RequestCommunicationController extends Controller
                     'error' => 'You are not allowed to send a message with this request.',
                 ],422);
             }
+
             else {
+                $type = 'sent a message';
+                $notificationMessage = $user->name.' '.$type.' on the request item with id '.$requests->id.'.';
+
+                //if sender is an admin
+                if($user->is_admin) {
+                    //for the other admin aside from the sender, if there are any
+                    $isThereOtherAdmin = User::where('is_admin', true)->where('id', '!=', Auth::id())->get();
+                    if($isThereOtherAdmin) {
+                        foreach($isThereOtherAdmin as $otherAdmin) {
+                            $isOtherAdminHasNotif = Notification::where('type', $type)->where('typeValueID', $request->idrequest)
+                            ->where('senderUserId', Auth::id())->where('recipientUserId', $otherAdmin->id);
+                            if($isOtherAdminHasNotif) {
+                                $isOtherAdminHasNotif->delete();
+                            }
+                            $notification = Notification::create([
+                                'recipientUserId' => $otherAdmin->id,
+                                'senderUserId' => Auth::id(),
+                                'type' => $type,
+                                'notificationMessage' => $notificationMessage,
+                                'isRead' => false,
+                                'typeValueID' => $request->idrequest
+                            ]);
+                        }
+                    }
+
+                    //for the sender who have requested the item
+                    $isThereNotif = Notification::where('type', $type)->where('typeValueID', $request->idrequest)
+                    ->where('senderUserId', Auth::id())->where('recipientUserId', $requests->idrequester);
+                    if($isThereNotif) {
+                        $isThereNotif->delete();
+                    }
+                    $notification = Notification::create([
+                        'recipientUserId' => $requests->idrequester,
+                        'senderUserId' => Auth::id(),
+                        'type' => $type,
+                        'notificationMessage' => $notificationMessage,
+                        'isRead' => false,
+                        'typeValueID' => $request->idrequest
+                    ]);
+
+                } else {
+                    //if the sender is not an admin, it will get all the admin and will loop the message so that the message will be sent to all admins.
+                    $allAdmin = User::where('is_admin', true)->get();
+                    foreach($allAdmin as $admin) {
+                        $isThereNotif = Notification::where('type', $type)->where('typeValueID', $request->idrequest)
+                        ->where('senderUserId', Auth::id())->where('recipientUserId', $admin->id);
+                        if($isThereNotif) {
+                            $isThereNotif->delete();
+                        }
+                        $notification = Notification::create([
+                            'recipientUserId' => $admin->id,
+                            'senderUserId' => Auth::id(),
+                            'type' => $type,
+                            'notificationMessage' => $notificationMessage,
+                            'isRead' => false,
+                            'typeValueID' => $request->idrequest
+                        ]);
+                    }
+                }
+
+
+                //send message
                 $sendmessage = RequestCommunication::create([
                     'idrequest' => $request->input('idrequest'),
                     'message' => $request->input('message'),
@@ -44,6 +108,7 @@ class RequestCommunicationController extends Controller
                     'message' => 'Message sent successfully.',
                     'sendername' => $user->name,
                     'data' => $sendmessage,
+                    'notification' => $notification
                 ], 200);
 
             }
