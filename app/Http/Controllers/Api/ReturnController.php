@@ -22,7 +22,7 @@ class ReturnController extends Controller
         $returns = Returns::join('requests','requests.id','=','returns.idrequest')
         ->join('items','items.id','=','requests.iditem')
         ->join('users', 'users.id','=','returns.idreturner')
-        ->select('*','returns.id as id')->orderBy('requests.created_at','desc')->get();
+        ->select('*','returns.id as id')->orderBy('returns.created_at','desc')->get();
 
         return response()->json([
             'data' => $returns
@@ -35,7 +35,7 @@ class ReturnController extends Controller
         $returns = Returns::where('idreturner', Auth::id())->join('requests','requests.id','=','returns.idrequest')
         ->join('items','items.id','=','requests.iditem')
         ->join('users', 'users.id','=','returns.idreturner')
-        ->select('*','returns.id as id')->get();
+        ->select('*','returns.id as id')->orderBy('returns.created_at','desc')->get();
 
         return response()->json([
             'data' => $returns
