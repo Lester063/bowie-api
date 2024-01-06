@@ -88,10 +88,27 @@ class ReturnController extends Controller
                     'isreturnsent' => true
                 ]);
             }
+            //send a notification to all admin
+            $user = User::find(Auth::id());
+            $type = 'returning the item';
+            $item = Item::find($getrequest->iditem);
+            $notificationMessage = $user->name.' is '.$type.' with item code '.$item->itemcode.' and return id '.$request->idrequest.'.';
+            $allAdmin = User::where('is_admin', true)->get();
+            foreach($allAdmin as $admin) {
+                $notification = Notification::create([
+                    'recipientUserId' => $admin->id,
+                    'senderUserId' => Auth::id(),
+                    'type' => $type,
+                    'notificationMessage' => $notificationMessage,
+                    'isRead' => false,
+                    'typeValueID' => $return->id
+                ]);
+            }
 
             return response()->json([
                 'message' => 'Request return was sent successfully.',
-                'data' => $return
+                'data' => $return,
+                'notification' => $notification,
             ], 200);
         }
     }

@@ -19,7 +19,6 @@ class RequestController extends Controller
      */
     public function indexAdmin()
     {
-
         $requests = Requests::join('items', 'items.id', '=', 'requests.iditem')->join('users','users.id','=','requests.idrequester')
         ->select('*','requests.id as id')->orderBy('requests.created_at','desc')->get();
 
@@ -42,7 +41,6 @@ class RequestController extends Controller
             'status' => 200,
             'data' => $requests,
         ], 200);
-        
     }
     
     public function store(Request $request)
@@ -82,10 +80,26 @@ class RequestController extends Controller
                     'statusrequest' => $request->input('statusrequest'),
                     'isreturnsent' => false,
                 ]);
+                //send a notification to all admin
+                $user = User::find(Auth::id());
+                $type = 'requesting the item';
+                $notificationMessage = $user->name.' is '.$type.' with item code '.$getItem->itemcode.'.';
+                $allAdmin = User::where('is_admin', true)->get();
+                foreach($allAdmin as $admin) {
+                    $notification = Notification::create([
+                        'recipientUserId' => $admin->id,
+                        'senderUserId' => Auth::id(),
+                        'type' => $type,
+                        'notificationMessage' => $notificationMessage,
+                        'isRead' => false,
+                        'typeValueID' => $requestdata->id
+                    ]);
+                }
     
                 return response()->json([
                     'message' => 'Request sent successfully.',
                     'data' => $requestdata,
+                    'notification' => $notification,
                 ], 200);
             }
         }
