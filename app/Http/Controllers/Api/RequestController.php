@@ -42,6 +42,18 @@ class RequestController extends Controller
             'data' => $requests,
         ], 200);
     }
+
+    public function viewRequest($id) {
+        $requests = Requests::where('requests.id', $id)
+        ->join('items', 'items.id', '=', 'requests.iditem')
+        ->join('users','users.id','=','requests.idrequester')
+        ->select('*','requests.id as id')->orderBy('requests.created_at','desc')->get();
+
+        return response()->json([
+            'status' => 200,
+            'data' => $requests,
+        ], 200);
+    }
     
     public function store(Request $request)
     {

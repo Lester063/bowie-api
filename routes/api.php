@@ -34,6 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //get user request/s
     Route::get('userrequest', [RequestController::class,'indexUser']);
+    Route::get('userrequest/{id}', [RequestController::class,'viewRequest']);
 
     //request comm -As as User, I would like to follow up with my request status or any queries.
     Route::post('requestcommunication', [RequestCommunicationController::class,'store']);
@@ -43,6 +44,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('return', [ReturnController::class,'store']);
     //return - user view
     Route::get('userreturns', [ReturnController::class,'indexUser']);
+    Route::get('return/{id}', [ReturnController::class,'viewReturn']);
 
     //notifications
     Route::get('notifications', [NotificationController::class,'userNotificationIndex']);
