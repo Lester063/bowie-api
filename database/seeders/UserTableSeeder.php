@@ -19,6 +19,7 @@ class UserTableSeeder extends Seeder
             'email' => 'lester@gmail.com',
             'password' => Hash::make('lester123'),
             'is_admin' => 1,
+            'profile_image' => null
         ]);
 
         User::create([
@@ -26,6 +27,7 @@ class UserTableSeeder extends Seeder
             'email' => 'jerome@gmail.com',
             'password' => Hash::make('lester123'),
             'is_admin' => 0,
+            'profile_image' => null
         ]);
 
         User::create([
@@ -33,6 +35,7 @@ class UserTableSeeder extends Seeder
             'email' => 'edmar@gmail.com',
             'password' => Hash::make('lester123'),
             'is_admin' => 0,
+            'profile_image' => null
         ]);
     }
 }
