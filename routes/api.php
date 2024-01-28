@@ -28,6 +28,7 @@ Route::get('items', [ItemController::class,'index']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('user', [AuthController::class, 'user']);
     Route::post('logout', [AuthController::class, 'logout']);
+    Route::post('uploadprofile', [AuthController::class,'uploadProfile']);
 
     //request item
     Route::post('requests', [RequestController::class,'store']);
@@ -50,6 +51,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('notifications', [NotificationController::class,'userNotificationIndex']);
     Route::put('notifications', [NotificationController::class,'readUnreadUserNotification']);
     Route::get('notifications/{id}', [NotificationController::class,'generateNotificationMessage']);
+
 });
 
 Route::middleware('auth:sanctum', 'is_admin')->group(function(){

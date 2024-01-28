@@ -75,4 +75,29 @@ class AuthController extends Controller
             'message' => 'Success'
         ])->withCookie($cookie);
     }
+
+    public function uploadProfile(Request $request) {
+        $user = User::find(Auth::id());
+        if($user) {
+            $this->validate($request, [
+                'profile_image' => 'file|mimes:jpg,jpeg,png|max:2058',
+            ]);
+            $image_path = $request->file('profile_image')->store('image', 'public');
+    
+            $user->update([
+                'profile_image' => $image_path,
+            ]);
+    
+            return response()->json([
+                'message' => 'Success',
+                'path' => $image_path
+            ], 200);
+        }
+        else {
+            return response()->json([
+                'message' => 'Unable to find the User.',
+                'id' => $user
+            ], 400);
+        }
+    }
 }
