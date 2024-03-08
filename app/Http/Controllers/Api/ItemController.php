@@ -24,6 +24,7 @@ class ItemController extends Controller
         $validator = Validator::make($request->all(),[
             'itemname' => 'required|string|max:191',
             'itemcode' => 'required|string|max:191',
+            'item_image' => 'file|mimes:jpg,jpeg,png|max:2058',
         ]);
 
         if($validator->fails()) {
@@ -31,10 +32,18 @@ class ItemController extends Controller
                 'status' => 422,
                 'errors' => $validator->messages()
             ], 422);
-        } else {
+        }
+        else {
+            if($request->item_image) {
+                $image_path = $request->file('item_image')->store('image', 'public');
+            }
+            else {
+                $image_path = null;
+            }
             $items = Item::create([
                 'itemname' => $request->itemname,
                 'itemcode' => $request->itemcode,
+                'item_image' => $image_path,
             ]);
         }
 
@@ -103,8 +112,7 @@ class ItemController extends Controller
                     'status' => 422,
                     'errors' => $validator->messages()
                 ], 422);
-            } 
-
+            }
             else if($verifyCode > 0) {
                 return response()->json([
                     'status' => 422,
@@ -113,13 +121,12 @@ class ItemController extends Controller
                     ],
                 ], 422);
             }
-            
             else {
                 $item->update([
                     'itemname' => $request->itemname,
                     'itemcode' => $request->itemcode,
                 ]);
-                $newdata=Item::find($id);
+                $newdata = Item::find($id);
                 return response()->json([
                     'status' => 200,
                     'message' => 'Data has been updated successfully.',
@@ -130,14 +137,14 @@ class ItemController extends Controller
     }
 
     public function delete($id) {
-        //add is_deleted column
         $item = Item::find($id);
         if(!$item) {
             return response()->json([
                 'status' => 404,
                 'message' => 'Unable to find the item.'
             ], 404);
-        } else {
+        }
+        else {
             $item->update([
                 'is_deleted' => true
             ]);
@@ -152,7 +159,7 @@ class ItemController extends Controller
                 return response()->json([
                     'status' => 500,
                     'message' => 'Something went wrong.'
-                ],500);
+                ], 500);
             }
         }
     }
