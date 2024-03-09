@@ -15,7 +15,9 @@ class AuthController extends Controller
 {
     public function register(Request $request) {
         $validator = Validator::make($request->all(),[
-            'name' => 'required|string|max:32',
+            'first_name' => 'required|string|max:32',
+            'middle_name' => 'max:32',
+            'last_name' => 'required|string|max:32',
             'email' => 'required|email|max:32|unique:'.User::class,
             'password' => 'required|min:8',
         ]);
@@ -27,7 +29,9 @@ class AuthController extends Controller
             ], 422);
         } else {
             $user = User::create([
-                'name' => $request->input('name'),
+                'first_name' => $request->input('first_name'),
+                'middle_name' => $request->input('middle_name'),
+                'last_name' => $request->input('last_name'),
                 'email' => $request->input('email'),
                 'password' => Hash::make($request->input('password')),
                 'is_admin' => false, // new users are automatically not admin
