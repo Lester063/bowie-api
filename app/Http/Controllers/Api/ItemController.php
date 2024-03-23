@@ -33,6 +33,13 @@ class ItemController extends Controller
                 'errors' => $validator->messages()
             ], 422);
         }
+        else if($this->verifyCodeIfExisting($request->itemcode, null)) {
+            return response()->json([
+                'status' => 422,
+                'errors' => ['itemcode' => 'Item code is already taken.'],
+            ], 422);
+        }
+
         else {
             if($request->item_image) {
                 $image_path = $request->file('item_image')->store('image', 'public');
@@ -93,9 +100,29 @@ class ItemController extends Controller
         }
     }
 
+    //we pass $id parameter for the verification when editing, null if creating
+    public function verifyCodeIfExisting($itemcode, $id) {
+        if(!is_null($id)) {
+            if(Item::where('itemcode', $itemcode)->where('id','!=',$id)->count() > 0) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            if(Item::where('itemcode', $itemcode)->count() > 0) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    }
+
     public function update(Request $request, int $id) {
         $item = Item::find($id);
-        $verifyCode = Item::where('itemcode', $request->itemcode)->where('id','!=',$id)->count();
+        //$verifyCode = Item::where('itemcode', $request->itemcode)->where('id','!=',$id)->count();
 
         if(!$item) {
             return response()->json([
@@ -113,7 +140,7 @@ class ItemController extends Controller
                     'errors' => $validator->messages()
                 ], 422);
             }
-            else if($verifyCode > 0) {
+            else if($this->verifyCodeIfExisting($request->itemcode, $id)) {
                 return response()->json([
                     'status' => 422,
                     'errors' => [
