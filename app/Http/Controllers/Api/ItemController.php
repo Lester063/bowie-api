@@ -41,12 +41,7 @@ class ItemController extends Controller
         }
 
         else {
-            if($request->item_image) {
-                $image_path = $request->file('item_image')->store('image', 'public');
-            }
-            else {
-                $image_path = null;
-            }
+            $image_path = $this->generateImagePath($request->item_image);
             $items = Item::create([
                 'itemname' => $request->itemname,
                 'itemcode' => $request->itemcode,
@@ -100,30 +95,8 @@ class ItemController extends Controller
         }
     }
 
-    //we pass $id parameter for the verification when editing, null if creating
-    public function verifyCodeIfExisting($itemcode, $id) {
-        if(!is_null($id)) {
-            if(Item::where('itemcode', $itemcode)->where('id','!=',$id)->count() > 0) {
-                return true;
-            }
-            else {
-                return false;
-            }
-        }
-        else {
-            if(Item::where('itemcode', $itemcode)->count() > 0) {
-                return true;
-            }
-            else {
-                return false;
-            }
-        }
-    }
-
     public function update(Request $request, int $id) {
         $item = Item::find($id);
-        //$verifyCode = Item::where('itemcode', $request->itemcode)->where('id','!=',$id)->count();
-
         if(!$item) {
             return response()->json([
                 'status' => 404,
@@ -149,9 +122,11 @@ class ItemController extends Controller
                 ], 422);
             }
             else {
+                $image_path = $this->generateImagePath($request->item_image);
                 $item->update([
                     'itemname' => $request->itemname,
                     'itemcode' => $request->itemcode,
+                    'item_image' => $image_path,
                 ]);
                 $newdata = Item::find($id);
                 return response()->json([
@@ -209,5 +184,35 @@ class ItemController extends Controller
                 'message' => 'Unable to find the item.'
             ], 404);
         }
+    }
+
+    //we pass $id parameter for the verification when editing, null if creating
+    public function verifyCodeIfExisting($itemcode, $id) {
+        if(!is_null($id)) {
+            if(Item::where('itemcode', $itemcode)->where('id','!=',$id)->count() > 0) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        else {
+            if(Item::where('itemcode', $itemcode)->count() > 0) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+    }
+
+    public function generateImagePath($item_image) {
+        if($item_image) {
+            $image_path = $item_image->store('image', 'public');
+        }
+        else {
+            $image_path = null;
+        }
+        return $image_path;
     }
 }

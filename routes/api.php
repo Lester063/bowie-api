@@ -60,7 +60,7 @@ Route::middleware('auth:sanctum', 'is_admin')->group(function(){
     Route::get('items/{id}', [ItemController::class,'show']);
     Route::get('items/{id}/edit', [ItemController::class,'edit']);
     Route::get('items/{id}/itemrequest', [ItemController::class,'itemRequest']);
-    Route::put('items/{id}/edit', [ItemController::class,'update']);
+    Route::post('items/{id}/edit', [ItemController::class,'update']);
     Route::delete('items/{id}/delete', [ItemController::class,'delete']);
 
     Route::get('requests', [RequestController::class,'indexAdmin']);
