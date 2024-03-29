@@ -19,7 +19,8 @@ class RequestController extends Controller
      */
     public function indexAdmin()
     {
-        $requests = Requests::join('items', 'items.id', '=', 'requests.iditem')->join('users','users.id','=','requests.idrequester')
+        $requests = Requests::join('items', 'items.id', '=', 'requests.iditem')
+        ->join('users','users.id','=','requests.idrequester')
         ->select('*','requests.id as id')->orderBy('requests.created_at','desc')->get();
 
         return response()->json([
@@ -72,7 +73,9 @@ class RequestController extends Controller
             $getItem = Item::find($request->iditem);
             $isItemAvailable = $getItem->is_available;
 
-            $userRequestPendingCount = Requests::where('iditem', $request->iditem)->where('idrequester', $request->idrequester)->where('statusrequest', 'Pending')->count();
+            $userRequestPendingCount = Requests::where('iditem', $request->iditem)
+            ->where('idrequester', $request->idrequester)
+            ->where('statusrequest', 'Pending')->count();
             if(!$isItemAvailable) {
                 return response()->json([
                     'status' => 422,

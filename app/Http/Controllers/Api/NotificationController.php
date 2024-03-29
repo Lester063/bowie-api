@@ -83,7 +83,8 @@ class NotificationController extends Controller
     }
 
     public function readUnreadUserNotification() {
-        $getUnreadUserNotification = Notification::where('recipientUserId', Auth::id())->where('isRead', false)->get();
+        $getUnreadUserNotification = Notification::where('recipientUserId', Auth::id())
+        ->where('isRead', false)->get();
 
         if($getUnreadUserNotification->count() > 0) {
             foreach($getUnreadUserNotification as $unreadNotification) {

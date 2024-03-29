@@ -32,10 +32,12 @@ class ReturnController extends Controller
     public function indexUser()
     {
         //$returns = Returns::all();
-        $returns = Returns::where('idreturner', Auth::id())->join('requests','requests.id','=','returns.idrequest')
+        $returns = Returns::where('idreturner', Auth::id())
+        ->join('requests','requests.id','=','returns.idrequest')
         ->join('items','items.id','=','requests.iditem')
         ->join('users', 'users.id','=','returns.idreturner')
-        ->select('*','returns.id as id')->orderBy('returns.created_at','desc')->get();
+        ->select('*','returns.id as id')
+        ->orderBy('returns.created_at','desc')->get();
 
         return response()->json([
             'data' => $returns
@@ -43,10 +45,12 @@ class ReturnController extends Controller
     }
 
     public function viewReturn($id) {
-        $returns = Returns::where('returns.id', $id)->join('requests','requests.id','=','returns.idrequest')
+        $returns = Returns::where('returns.id', $id)
+        ->join('requests','requests.id','=','returns.idrequest')
         ->join('items','items.id','=','requests.iditem')
         ->join('users', 'users.id','=','returns.idreturner')
-        ->select('*','returns.id as id')->orderBy('returns.created_at','desc')->get();
+        ->select('*','returns.id as id')
+        ->orderBy('returns.created_at','desc')->get();
 
         return response()->json([
             'data' => $returns
@@ -69,7 +73,8 @@ class ReturnController extends Controller
         $getrequest = Requests::find($request->idrequest);
         // var $hasReturnPending = false;
 
-        $hasPendingReturn = Returns::where('idrequest', $request->idrequest)->where('is_approve', 0)->count();
+        $hasPendingReturn = Returns::where('idrequest', $request->idrequest)
+        ->where('is_approve', 0)->count();
         // foreach($getrequest)
 
         if(!$getrequest) {
