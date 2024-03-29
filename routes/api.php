@@ -9,6 +9,7 @@ use App\Http\Controllers\api\ReturnController;
 use App\Http\Controllers\api\RequestController;
 use App\Http\Controllers\Api\RequestCommunicationController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\CommentReviewController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -51,6 +52,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('notifications', [NotificationController::class,'userNotificationIndex']);
     Route::put('notifications', [NotificationController::class,'readUnreadUserNotification']);
     Route::get('notifications/{id}', [NotificationController::class,'generateNotificationMessage']);
+
+    //commentreview
+    Route::post('comment', [CommentReviewController::class, 'store']);
 
 });
 

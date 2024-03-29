@@ -106,7 +106,7 @@ class RequestCommunicationController extends Controller
                 
                 return response()->json([
                     'message' => 'Message sent successfully.',
-                    'sendername' => $user->name,
+                    'sendername' => $user->first_name,
                     'data' => $sendmessage,
                     'notification' => $notification
                 ], 200);
