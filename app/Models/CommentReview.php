@@ -14,4 +14,10 @@ class CommentReview extends Model
         'comment',
         'idrequest'
     ];
+
+    protected $hidden = [
+        'password',
+        'is_admin',
+        'isreturnsent',
+    ];
 }

@@ -22,18 +22,12 @@ io.on('connection', (socket) => {
 
     socket.on('sendChatToServer', (message) => {
         console.log(message);
-
-        // io.sockets.emit('sendChatToClient', message);
         socket.broadcast.emit('sendChatToClient', message);
-        //socket.emit('sendChatToClient', message);
     });
 
     socket.on('sendNotificationToServer', (message) => {
         console.log(message);
-
-        // io.sockets.emit('sendChatToClient', message);
         socket.broadcast.emit('sendNotificationToClient', message);
-        //socket.emit('sendChatToClient', message);
     });
 
 

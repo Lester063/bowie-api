@@ -92,4 +92,21 @@ class CommentReviewController extends Controller
     {
         //
     }
+
+    public function showItemReviews($id) {
+        $requests = Requests::where('iditem', $id)->get();
+        $reviews = [];
+        foreach($requests as $req) {
+            $review = CommentReview::where('idrequest', $req->id)
+            ->join('requests', 'requests.id', '=', 'comment_reviews.idrequest')
+            ->join('users', 'users.id', '=', 'requests.idrequester')
+            ->get();
+            array_push($reviews, $review);
+        }        
+
+        return response()->json([
+            'data' => $reviews
+        ], 200);
+
+    }
 }

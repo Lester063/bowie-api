@@ -55,6 +55,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     //commentreview
     Route::post('comment', [CommentReviewController::class, 'store']);
+    Route::get('itemreviews/{id}', [CommentReviewController::class, 'showItemReviews']);
 
 });
 
