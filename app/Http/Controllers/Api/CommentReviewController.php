@@ -101,11 +101,13 @@ class CommentReviewController extends Controller
             ->join('requests', 'requests.id', '=', 'comment_reviews.idrequest')
             ->join('users', 'users.id', '=', 'requests.idrequester')
             ->get();
-            array_push($reviews, $review);
-        }        
 
+            array_push($reviews, $review);
+
+        }
+        
         return response()->json([
-            'data' => $reviews
+            'data' => $reviews,
         ], 200);
 
     }

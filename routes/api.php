@@ -56,13 +56,13 @@ Route::middleware('auth:sanctum')->group(function () {
     //commentreview
     Route::post('comment', [CommentReviewController::class, 'store']);
     Route::get('itemreviews/{id}', [CommentReviewController::class, 'showItemReviews']);
+    Route::get('items/{id}', [ItemController::class,'show']);
 
 });
 
 Route::middleware('auth:sanctum', 'is_admin')->group(function(){
 
     Route::post('items', [ItemController::class,'store']);
-    Route::get('items/{id}', [ItemController::class,'show']);
     Route::get('items/{id}/edit', [ItemController::class,'edit']);
     Route::get('items/{id}/itemrequest', [ItemController::class,'itemRequest']);
     Route::post('items/{id}/edit', [ItemController::class,'update']);
