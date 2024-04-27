@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('idrequest');
             $table->string('idreturner');
             $table->boolean('is_approve');
+            $table->boolean('is_reviewed')->default(false);
             $table->timestamps();
         });
     }

@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Requests;
+use Illuminate\Http\Request;
 use App\Models\CommentReview;
+use App\Models\Returns;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class CommentReviewController extends Controller
 {
@@ -31,13 +33,22 @@ class CommentReviewController extends Controller
      */
     public function store(Request $request)
     {
-        $getRequest = Requests::where('id', $request->idrequest)
-        ->where('statusrequest', 'Completed')
-        ->where('idrequester', Auth::id())->count();
-        if($getRequest > 0) {
-            if(CommentReview::where('idrequest', $request->idrequest)->count() > 0) {
+        $validator = Validator::make($request->all(),[
+            'rating' => 'required|int|max:11',
+            'comment' => 'required|string|max:191|',
+            'idrequest' => 'required|max:11',
+        ]);
+        if($validator->fails()) {
+            return response()->json([
+                'status' => 422,
+                'errors' => $validator->messages()
+            ], 422);
+        }
+        else {
+            $return = Returns::where('idrequest', $request->idrequest)->first();
+            if($return->is_reviewed) {
                 return response()->json([
-                    'message' => 'You can only review once per completed request.'
+                    'errors' => ['message' => 'You can only review once per completed request.']
                 ], 400);
             }
             else {
@@ -46,17 +57,15 @@ class CommentReviewController extends Controller
                     'comment' => $request->comment,
                     'idrequest' => $request->idrequest,
                 ]);
+                $return->update([
+                    'is_reviewed' => true
+                ]);
 
                 return response()->json([
                     'message' => 'You have reviewed on this request successfully.',
                     'data' => $commentreview
                 ], 200);
             }
-        }
-        else {
-            return response()->json([
-                'message' => 'Something is wrong.',
-            ], 400);
         }
 
     }
@@ -95,17 +104,9 @@ class CommentReviewController extends Controller
 
     public function showItemReviews($id) {
         $requests = Requests::where('iditem', $id)->get();
-        $reviews = [];
-        foreach($requests as $req) {
-            $review = CommentReview::where('idrequest', $req->id)
-            ->join('requests', 'requests.id', '=', 'comment_reviews.idrequest')
-            ->join('users', 'users.id', '=', 'requests.idrequester')
-            ->get();
-
-            array_push($reviews, $review);
-
-        }
-        
+        $reviews = CommentReview::whereIn('idrequest', $requests->pluck('id'))
+                    ->join('requests', 'requests.id', '=', 'comment_reviews.idrequest')
+                    ->join('users', 'users.id', '=', 'requests.idrequester')->get();
         return response()->json([
             'data' => $reviews,
         ], 200);

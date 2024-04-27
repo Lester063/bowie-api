@@ -13,6 +13,7 @@ class Returns extends Model
         'idrequest',
         'idreturner',
         'is_approve',
+        'is_reviewed'
     ];
 
     protected $hidden = [
