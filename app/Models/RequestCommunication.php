@@ -13,6 +13,7 @@ class RequestCommunication extends Model
         'idrequest',
         'idsender',
         'message',
+        'isRead',
     ];
 
     protected $hidden = [

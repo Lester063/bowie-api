@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('idrequest');
             $table->string('idsender');
             $table->string('message');
+            $table->boolean('isRead')->default(false);
             $table->timestamps();
         });
     }

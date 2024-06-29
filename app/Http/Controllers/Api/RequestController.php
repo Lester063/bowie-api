@@ -193,7 +193,8 @@ class RequestController extends Controller
     
                             RequestCommunication::create([
                                 'idrequest' => $singlerequest->id,
-                                'message' => 'The item you have requested has been processed to other User. Therefore, this request will be closed, thank you.',
+                                'message' => 'The item you have requested has been processed to other User. 
+                                 Therefore, this request will be closed, thank you.',
                                 'idsender' => Auth::id(),
                             ]);
 
