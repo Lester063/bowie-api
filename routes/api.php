@@ -41,6 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //request comm -As as User, I would like to follow up with my request status or any queries.
     Route::post('requestcommunication', [RequestCommunicationController::class,'store']);
     Route::get('requestcommunication/{id}', [RequestCommunicationController::class,'show']);
+    Route::put('readmessage/{id}', [RequestCommunicationController::class,'readUnreadMessage']);
 
     //return item
     Route::post('return', [ReturnController::class,'store']);

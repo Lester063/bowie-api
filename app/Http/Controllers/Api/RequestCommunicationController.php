@@ -15,7 +15,8 @@ class RequestCommunicationController extends Controller
 {
     public function store(Request $request) {
         $validator = Validator::make($request->all(),[
-            'idrequest' => 'required|string|exists:requests,id', //validates if idrequest does exist on requests table -id
+            //validates if idrequest does exist on requests table -id
+            'idrequest' => 'required|string|exists:requests,id',
             'message' => 'required|string|max:255',
         ]);
 
@@ -45,8 +46,10 @@ class RequestCommunicationController extends Controller
                     $isThereOtherAdmin = User::where('is_admin', true)->where('id', '!=', Auth::id())->get();
                     if($isThereOtherAdmin) {
                         foreach($isThereOtherAdmin as $otherAdmin) {
-                            $isOtherAdminHasNotif = Notification::where('type', $type)->where('typeValueID', $request->idrequest)
-                            ->where('senderUserId', Auth::id())->where('recipientUserId', $otherAdmin->id);
+                            $isOtherAdminHasNotif = Notification::where('type', $type)
+                            ->where('typeValueID', $request->idrequest)
+                            ->where('senderUserId', Auth::id())
+                            ->where('recipientUserId', $otherAdmin->id);
                             if($isOtherAdminHasNotif) {
                                 $isOtherAdminHasNotif->delete();
                             }
@@ -62,8 +65,10 @@ class RequestCommunicationController extends Controller
                     }
 
                     //for the sender who have requested the item
-                    $isThereNotif = Notification::where('type', $type)->where('typeValueID', $request->idrequest)
-                    ->where('senderUserId', Auth::id())->where('recipientUserId', $requests->idrequester);
+                    $isThereNotif = Notification::where('type', $type)
+                    ->where('typeValueID', $request->idrequest)
+                    ->where('senderUserId', Auth::id())
+                    ->where('recipientUserId', $requests->idrequester);
                     if($isThereNotif) {
                         $isThereNotif->delete();
                     }
@@ -77,11 +82,14 @@ class RequestCommunicationController extends Controller
                     ]);
 
                 } else {
-                    //if the sender is not an admin, it will get all the admin and will loop the message so that the message will be sent to all admins.
+                    /*if the sender is not an admin, it will get all the admin and will 
+                    loop the message so that the message will be sent to all admins. **/
                     $allAdmin = User::where('is_admin', true)->get();
                     foreach($allAdmin as $admin) {
-                        $isThereNotif = Notification::where('type', $type)->where('typeValueID', $request->idrequest)
-                        ->where('senderUserId', Auth::id())->where('recipientUserId', $admin->id);
+                        $isThereNotif = Notification::where('type', $type)
+                        ->where('typeValueID', $request->idrequest)
+                        ->where('senderUserId', Auth::id())
+                        ->where('recipientUserId', $admin->id);
                         if($isThereNotif) {
                             $isThereNotif->delete();
                         }
@@ -126,7 +134,11 @@ class RequestCommunicationController extends Controller
         }
         else {
             $comms = RequestCommunication::where('idrequest', $id)
-            ->join('users','users.id', '=', 'request_communications.idsender')->select('*','request_communications.id as id')->get();
+            ->join('users','users.id', '=', 'request_communications.idsender')
+            ->select('*', 'request_communications.id as id',
+            'request_communications.created_at as created_at',
+            'request_communications.updated_at as updated_at'
+            )->get();
             $checkAuth = false;
             foreach($comms as $comm) {
                 if($comm->idsender == Auth::id()) {
@@ -140,11 +152,47 @@ class RequestCommunicationController extends Controller
                 ], 422);
             }
             else {
+                $this->readUnreadMessage($id);
                 return response()->json([
                     'statusrequest' => $getRequest->statusrequest,
                     'data' => $comms,
                 ], 200);
             }
+        }
+    }
+
+    public function readUnreadMessage($id) {
+        $unreadMessages = RequestCommunication::where('idrequest', $id)
+        ->where('idsender', '!=', Auth::id())
+        ->where('isRead', false)->get();
+        $checkAuth = false;
+        $user = User::find(Auth::id());
+        $getRequest = Requests::find($id);
+
+        if($getRequest) {
+            if(!$user->is_admin && $getRequest->idrequester != Auth::id()) {
+                return response()->json([
+                    'message' => 'You are not allowed to view the messages on this request.',
+                ], 422);
+            }
+            else {
+                if($unreadMessages->count() > 0) {
+                    foreach($unreadMessages as $unreadMessage) {
+                        $unreadMessage->update([
+                            'isRead' => true
+                        ]);
+                    }
+                }
+        
+                return response()->json([
+                    'message' => 'success'
+                ], 200);
+            }
+        }
+        else {
+            return response()->json([
+                'message' => 'Unable to find the request id.'
+            ], 422);
         }
     }
 }
