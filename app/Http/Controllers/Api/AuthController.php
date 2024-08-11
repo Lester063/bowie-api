@@ -56,7 +56,6 @@ class AuthController extends Controller
         }
 
         //$user = Auth::user();
-
         $token = Auth::user()->createToken('token')->plainTextToken;
 
         $cookie = cookie('jwt', $token, 60 * 24);
@@ -102,6 +101,25 @@ class AuthController extends Controller
                 'message' => 'Unable to find the User.',
                 'id' => $user
             ], 400);
+        }
+    }
+
+    public function delete($id) {
+        $user = User::find($id);
+        if($user) {
+            $user->delete();
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'User was deleted successfully.',
+                'data' => $user
+            ],200);
+        }
+        else {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Unable to find the User.',
+            ], 404);
         }
     }
 }
