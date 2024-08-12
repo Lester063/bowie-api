@@ -52,7 +52,7 @@ class AuthController extends Controller
             return response([
                 'message' => 'Invalid Credentials',
                 'statuscode' => 422,
-            ]);
+            ], 422);
         }
 
         //$user = Auth::user();
