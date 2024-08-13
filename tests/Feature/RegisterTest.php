@@ -5,15 +5,12 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
-use Tests\Feature\LoginTest as LoginTest; // Import the LoginTest
 
 class RegisterTest extends TestCase
 {
-    /**
-     * A basic feature test example.
-     */
-    public function test_register_success(): void
-    {
+    use ReusableTest;
+    
+    public function testRegisterSuccessUserAccount() {
         $data = [
             'first_name' => 'Test Name',
             'middle_name' => 'Test',
@@ -29,11 +26,10 @@ class RegisterTest extends TestCase
         $this->assertTrue($response['data']['first_name'] == 'Test Name');
 
         //delete test data
-        $this->test_delete_user($response['data']['id']);
+        $this->testDeleteUser($response['data']['id']);
     }
 
-    public function test_duplicate_email_validation(): void
-    {
+    public function testRegisterDuplicateEmail() {
         $data1 = [
             'first_name' => 'Test Name1',
             'middle_name' => 'Test1',
@@ -59,11 +55,10 @@ class RegisterTest extends TestCase
         $user2->assertStatus(422);
 
         //delete test data
-        $this->test_delete_user($user1['data']['id']);
+        $this->testDeleteUser($user1['data']['id']);
     }
 
-    public function test_register_invalid_email(): void
-    {
+    public function testRegisterInvalidEmail() {
         $data = [
             'first_name' => 'Test Name',
             'middle_name' => 'Test',
@@ -86,8 +81,7 @@ class RegisterTest extends TestCase
         ]);
     }
 
-    public function test_register_no_email(): void
-    {
+    public function testRegisterNoEmail() {
         $data = [
             'first_name' => 'Test Name',
             'middle_name' => 'Test',
@@ -110,8 +104,7 @@ class RegisterTest extends TestCase
         ]);
     }
 
-    public function test_register_no_password(): void
-    {
+    public function testRegisterNoPassword() {
         $data = [
             'first_name' => 'Test Name',
             'middle_name' => 'Test',
@@ -135,14 +128,14 @@ class RegisterTest extends TestCase
     }
 
     //use to cleanup data used on testing
-    private function test_delete_user($id): void
-    {
+    private function testDeleteUser($id) {
         //Admin User
         $credentials = [
             'email' => 'lester@gmail.com',
             'password' => 'lester123'
         ];
-        $login = $this->post('http://localhost:8000/api/login', $credentials);
+        $this->test_login($credentials);
+        //$login = $this->post('http://localhost:8000/api/login', $credentials);
         $delete = $this->delete('http://localhost:8000/api/user/'.$id.'/delete');
         $delete->assertStatus(200);
     }
