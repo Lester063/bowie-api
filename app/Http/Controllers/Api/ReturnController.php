@@ -70,6 +70,8 @@ class ReturnController extends Controller
      */
     public function store(Request $request)
     {
+        $notificationController = new \App\Http\Controllers\Api\NotificationController;
+
         $getrequest = Requests::find($request->idrequest);
         // var $hasReturnPending = false;
 
@@ -111,7 +113,7 @@ class ReturnController extends Controller
             $notificationMessage = $user->name.' is '.$type.' with item code '.$item->itemcode.' and return id '.$request->idrequest.'.';
             $allAdmin = User::where('is_admin', true)->get();
             foreach($allAdmin as $admin) {
-                $notification = Notification::create([
+                $notification = $notificationController->createNotification([
                     'recipientUserId' => $admin->id,
                     'senderUserId' => Auth::id(),
                     'type' => $type,
@@ -163,6 +165,7 @@ class ReturnController extends Controller
 
     public function approve(Request $request, string $id)
     {
+        $notificationController = new \App\Http\Controllers\Api\NotificationController;
         $return = Returns::find($id);
 
         if(!$return) {
@@ -197,7 +200,7 @@ class ReturnController extends Controller
                 $type = 'approve the return';
                 $notificationMessage = $approver->name.' '.$type.' of the item with code '.$item->itemcode;
 
-                $notification = Notification::create([
+                $notification = $notificationController->createNotification([
                     'recipientUserId' => $return->idreturner,
                     'senderUserId' => Auth::id(),
                     'type' => $type,
