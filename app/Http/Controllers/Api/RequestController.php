@@ -100,7 +100,13 @@ class RequestController extends Controller
                 //send a notification to all admin
                 $user = User::find(Auth::id());
                 $type = 'requesting the item';
-                $notificationMessage = $user->name.' is '.$type.' with item code '.$getItem->itemcode.'.';
+                //e.g Lester is requesting the item OGE
+                $notificationMessage = $notificationController->generateNotificationMessage([
+                    'firstName' => $user->first_name,
+                    'type' => $type,
+                    'itemCode' => $getItem->itemcode
+                ]);
+                
                 $allAdmin = User::where('is_admin', true)->get();
                 foreach($allAdmin as $admin) {
                     $notification = $notificationController->createNotification([
@@ -228,7 +234,12 @@ class RequestController extends Controller
                         'idsender' => Auth::id(),
                     ]);
                     $type = 'approve the request';
-                    $notificationMessage = $approver->name.' '.$type.' of the item with code '.$item->itemcode;
+                    //e.g Lester approve the request of item OGE
+                    $notificationMessage = $notificationController->generateNotificationMessage([
+                        'firstName' => $approver->first_name,
+                        'type' => $type,
+                        'itemCode' => $item->itemcode
+                    ]);
                     $notification = $notificationController->createNotification([
                         'recipientUserId' => $requests->idrequester,
                         'senderUserId' => Auth::id(),
