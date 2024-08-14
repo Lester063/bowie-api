@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 class RequestCommunicationController extends Controller
 {
     public function store(Request $request) {
+        $notificationController = new \App\Http\Controllers\Api\NotificationController;
         $validator = Validator::make($request->all(),[
             //validates if idrequest does exist on requests table -id
             'idrequest' => 'required|string|exists:requests,id',
@@ -42,7 +43,7 @@ class RequestCommunicationController extends Controller
 
                 //if sender is an admin
                 if($user->is_admin) {
-                    //for the other admin aside from the sender, if there are any
+                    //for the other admin aside from the admin sender, if there are any
                     $isThereOtherAdmin = User::where('is_admin', true)->where('id', '!=', Auth::id())->get();
                     if($isThereOtherAdmin) {
                         foreach($isThereOtherAdmin as $otherAdmin) {
@@ -53,7 +54,8 @@ class RequestCommunicationController extends Controller
                             if($isOtherAdminHasNotif) {
                                 $isOtherAdminHasNotif->delete();
                             }
-                            $notification = Notification::create([
+
+                            $notification = $notificationController->createNotification([
                                 'recipientUserId' => $otherAdmin->id,
                                 'senderUserId' => Auth::id(),
                                 'type' => $type,
@@ -72,7 +74,7 @@ class RequestCommunicationController extends Controller
                     if($isThereNotif) {
                         $isThereNotif->delete();
                     }
-                    $notification = Notification::create([
+                    $notification = $notificationController->createNotification([
                         'recipientUserId' => $requests->idrequester,
                         'senderUserId' => Auth::id(),
                         'type' => $type,
@@ -80,7 +82,6 @@ class RequestCommunicationController extends Controller
                         'isRead' => false,
                         'typeValueID' => $request->idrequest
                     ]);
-
                 } else {
                     /*if the sender is not an admin, it will get all the admin and will 
                     loop the message so that the message will be sent to all admins. **/
@@ -93,7 +94,8 @@ class RequestCommunicationController extends Controller
                         if($isThereNotif) {
                             $isThereNotif->delete();
                         }
-                        $notification = Notification::create([
+
+                        $notification = $notificationController->createNotification([
                             'recipientUserId' => $admin->id,
                             'senderUserId' => Auth::id(),
                             'type' => $type,
@@ -103,7 +105,6 @@ class RequestCommunicationController extends Controller
                         ]);
                     }
                 }
-
 
                 //send message
                 $sendmessage = RequestCommunication::create([

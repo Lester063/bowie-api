@@ -58,6 +58,8 @@ class RequestController extends Controller
     
     public function store(Request $request)
     {
+        $notificationController = new \App\Http\Controllers\Api\NotificationController;
+
         $validator = Validator::make($request->all(),[
             'idrequester' => 'required|string|max:8|exists:users,id',
             'iditem' => 'required|string|max:8|exists:items,id',
@@ -101,7 +103,7 @@ class RequestController extends Controller
                 $notificationMessage = $user->name.' is '.$type.' with item code '.$getItem->itemcode.'.';
                 $allAdmin = User::where('is_admin', true)->get();
                 foreach($allAdmin as $admin) {
-                    $notification = Notification::create([
+                    $notification = $notificationController->createNotification([
                         'recipientUserId' => $admin->id,
                         'senderUserId' => Auth::id(),
                         'type' => $type,
@@ -154,6 +156,8 @@ class RequestController extends Controller
 
     public function actionRequest(Request $request, string $id)
     {
+        $notificationController = new \App\Http\Controllers\Api\NotificationController;
+
         $requests = Requests::find($id);
         $allrequests = Requests::where('iditem', $requests->iditem)->where('statusrequest', 'Pending')->get();
         $item = Item::find($requests->iditem);
@@ -201,7 +205,8 @@ class RequestController extends Controller
                             //unable to make a real time notif because we do not return a response each loop
                             $type = 'close the request';
                             $notificationMessage = $approver->name.' '.$type.' of the item with code '.$item->itemcode;
-                            $notification = Notification::create([
+
+                            $notification = $notificationController->createNotification([
                                 'recipientUserId' => $singlerequest->idrequester,
                                 'senderUserId' => Auth::id(),
                                 'type' => $type,
@@ -224,8 +229,7 @@ class RequestController extends Controller
                     ]);
                     $type = 'approve the request';
                     $notificationMessage = $approver->name.' '.$type.' of the item with code '.$item->itemcode;
-
-                    $notification = Notification::create([
+                    $notification = $notificationController->createNotification([
                         'recipientUserId' => $requests->idrequester,
                         'senderUserId' => Auth::id(),
                         'type' => $type,
@@ -252,8 +256,7 @@ class RequestController extends Controller
 
                     $type = 'decline the request';
                     $notificationMessage = $approver->name.' '.$type.' of the item with code '.$item->itemcode;
-
-                    $notification = Notification::create([
+                    $notification = $notificationController->createNotification([
                         'recipientUserId' => $requests->idrequester,
                         'senderUserId' => Auth::id(),
                         'type' => $type,
@@ -261,7 +264,7 @@ class RequestController extends Controller
                         'isRead' => false,
                         'typeValueID' => $id
                     ]);
-                    
+
                     $requestnewdata = Requests::find($id);
                     return response()->json([
                         'message' => 'Request was declined.',

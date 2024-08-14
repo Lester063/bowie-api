@@ -20,7 +20,7 @@ class NotificationController extends Controller
         $unreadNotification = Notification::where('recipientUserId', Auth::id())->where('isRead', false)->count();
 
         foreach($getUserNotifications as $userNotification) {
-            $getMessage = $this->generateNotificationMessage($userNotification->id);
+            $getMessage = $this->regenerateNotificationMessage($userNotification->id);
             $userNotification->update([
                 'notificationMessage' => $getMessage
             ]);
@@ -34,12 +34,25 @@ class NotificationController extends Controller
 
     }
 
+    public function createNotification($data) {
+        $notification = Notification::create([
+            'recipientUserId' => $data['recipientUserId'],
+            'senderUserId' => $data['senderUserId'],
+            'type' => $data['type'],
+            'notificationMessage' => $data['notificationMessage'],
+            'isRead' => $data['isRead'],
+            'typeValueID' => $data['typeValueID']
+        ]);
+
+        return $notification;
+    }
+
     //approve the request typeValueID = request id
     //approve the return typeValueID = return id
     //sent a message typeValueID = request id
     //requesting the item typeValueID = request id
     //returning the item typeValueID = return id
-    public function generateNotificationMessage($id) {
+    public function regenerateNotificationMessage($id) {
         $notification = Notification::find($id);
         if($notification->type === 'approve the request' || $notification->type === 'decline the request' || $notification->type === 'close the request') {
             $requests = Requests::find($notification->typeValueID);
