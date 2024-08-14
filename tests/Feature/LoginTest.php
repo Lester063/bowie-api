@@ -9,17 +9,9 @@ use Illuminate\Support\Facades\Response as FacadeResponse;
 
 class LoginTest extends TestCase
 {
-    /**
-     * A basic feature test example.
-     */
-    private function test_login($credentials)
-    {
-        $login = $this->post('http://localhost:8000/api/login', $credentials);
-        return $login;
-    }
+    use ReusableTest;
 
-    public function test_login_success_admin(): void
-    {
+    public function testLoginSuccessAdmin() {
         //Admin User
         $credentials = [
             'email' => 'lester@gmail.com',
@@ -36,8 +28,7 @@ class LoginTest extends TestCase
             ]);
     }
 
-    public function test_login_success_user(): void
-    {
+    public function testLoginSuccessUser() {
         //Normal User
         $credentials = [
             'email' => 'jerome@gmail.com',
@@ -54,8 +45,7 @@ class LoginTest extends TestCase
             ]);
     }
 
-    public function test_login_invalid_email(): void
-    {
+    public function testLoginInvalidEmail() {
         $credentials = [
             'email' => 'lester.com',
             'password' => 'lester123'
@@ -68,8 +58,7 @@ class LoginTest extends TestCase
             ]);
     }
 
-    public function test_login_invalid_password(): void
-    {
+    public function testLoginInvalidPassword() {
         $credentials = [
             'email' => 'lester@gmail.com',
             'password' => 'lester1234'
@@ -82,8 +71,7 @@ class LoginTest extends TestCase
             ]);
     }
 
-    public function test_login_no_email(): void
-    {
+    public function testLoginNoEmail() {
         $credentials = [
             'email' => '',
             'password' => 'lester1234'
@@ -96,8 +84,7 @@ class LoginTest extends TestCase
             ]);
     }
 
-    public function test_login_no_password(): void
-    {
+    public function testLoginNoPassword() {
         $credentials = [
             'email' => 'lester@gmail.com',
             'password' => ''
@@ -110,8 +97,7 @@ class LoginTest extends TestCase
             ]);
     }
 
-    public function test_login_no_credentials(): void
-    {
+    public function testLoginNoCredentials() {
         $credentials = [
             'email' => '',
             'password' => ''
