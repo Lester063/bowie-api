@@ -99,20 +99,20 @@ class RequestController extends Controller
                 ]);
                 //send a notification to all admin
                 $user = User::find(Auth::id());
-                $type = 'requesting the item';
                 //e.g Lester is requesting the item OGE
+                $notificationType = 'requesting the item';
                 $notificationMessage = $notificationController->generateNotificationMessage([
                     'firstName' => $user->first_name,
-                    'type' => $type,
+                    'type' => $notificationType,
                     'itemCode' => $getItem->itemcode
                 ]);
                 
                 $allAdmin = User::where('is_admin', true)->get();
                 foreach($allAdmin as $admin) {
-                    $notification = $notificationController->createNotification([
+                    $notification = $notificationController->sendNotification([
                         'recipientUserId' => $admin->id,
                         'senderUserId' => Auth::id(),
-                        'type' => $type,
+                        'type' => $notificationType,
                         'notificationMessage' => $notificationMessage,
                         'isRead' => false,
                         'typeValueID' => $requestdata->id
@@ -209,13 +209,18 @@ class RequestController extends Controller
                             ]);
 
                             //unable to make a real time notif because we do not return a response each loop
-                            $type = 'close the request';
-                            $notificationMessage = $approver->name.' '.$type.' of the item with code '.$item->itemcode;
+                            //e.g Lester close the request of item OGE
+                            $notificationType = 'close the request';
+                            $notificationMessage = $notificationController->generateNotificationMessage([
+                                'firstName' => $approver->first_name,
+                                'type' => $notificationType,
+                                'itemCode' => $item->itemcode
+                            ]);
 
-                            $notification = $notificationController->createNotification([
+                            $notification = $notificationController->sendNotification([
                                 'recipientUserId' => $singlerequest->idrequester,
                                 'senderUserId' => Auth::id(),
-                                'type' => $type,
+                                'type' => $notificationType,
                                 'notificationMessage' => $notificationMessage,
                                 'isRead' => false,
                                 'typeValueID' => $id
@@ -233,17 +238,17 @@ class RequestController extends Controller
                         'message' => 'Your request for this item has been approved.',
                         'idsender' => Auth::id(),
                     ]);
-                    $type = 'approve the request';
                     //e.g Lester approve the request of item OGE
+                    $notificationType = 'approve the request';
                     $notificationMessage = $notificationController->generateNotificationMessage([
                         'firstName' => $approver->first_name,
-                        'type' => $type,
+                        'type' => $notificationType,
                         'itemCode' => $item->itemcode
                     ]);
-                    $notification = $notificationController->createNotification([
+                    $notification = $notificationController->sendNotification([
                         'recipientUserId' => $requests->idrequester,
                         'senderUserId' => Auth::id(),
-                        'type' => $type,
+                        'type' => $notificationType,
                         'notificationMessage' => $notificationMessage,
                         'isRead' => false,
                         'typeValueID' => $id
@@ -265,12 +270,17 @@ class RequestController extends Controller
                         'statusrequest' => 'Declined'
                     ]);
 
-                    $type = 'decline the request';
-                    $notificationMessage = $approver->name.' '.$type.' of the item with code '.$item->itemcode;
-                    $notification = $notificationController->createNotification([
+                    //e.g Lester decline the request of item OGE
+                    $notificationType = 'decline the request';
+                    $notificationMessage = $notificationController->generateNotificationMessage([
+                        'firstName' => $approver->first_name,
+                        'type' => $notificationType,
+                        'itemCode' => $item->itemcode
+                    ]);
+                    $notification = $notificationController->sendNotification([
                         'recipientUserId' => $requests->idrequester,
                         'senderUserId' => Auth::id(),
-                        'type' => $type,
+                        'type' => $notificationType,
                         'notificationMessage' => $notificationMessage,
                         'isRead' => false,
                         'typeValueID' => $id

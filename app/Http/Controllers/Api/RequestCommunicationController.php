@@ -38,8 +38,12 @@ class RequestCommunicationController extends Controller
             }
 
             else {
-                $type = 'sent a message';
-                $notificationMessage = $user->name.' '.$type.' on the request item with id '.$requests->id.'.';
+                $notificationType = 'sent a message';
+                $notificationMessage = $notificationController->generateNotificationMessage([
+                    'firstName' => $user->first_name,
+                    'type' => $notificationType,
+                    'requestID' => $requests->id
+                ]);
 
                 //if sender is an admin
                 if($user->is_admin) {
@@ -47,7 +51,8 @@ class RequestCommunicationController extends Controller
                     $isThereOtherAdmin = User::where('is_admin', true)->where('id', '!=', Auth::id())->get();
                     if($isThereOtherAdmin) {
                         foreach($isThereOtherAdmin as $otherAdmin) {
-                            $isOtherAdminHasNotif = Notification::where('type', $type)
+                            //loop each admin -> delete existing notif related to this request -> create
+                            $isOtherAdminHasNotif = Notification::where('type', $notificationType)
                             ->where('typeValueID', $request->idrequest)
                             ->where('senderUserId', Auth::id())
                             ->where('recipientUserId', $otherAdmin->id);
@@ -55,10 +60,10 @@ class RequestCommunicationController extends Controller
                                 $isOtherAdminHasNotif->delete();
                             }
 
-                            $notification = $notificationController->createNotification([
+                            $notification = $notificationController->sendNotification([
                                 'recipientUserId' => $otherAdmin->id,
                                 'senderUserId' => Auth::id(),
-                                'type' => $type,
+                                'type' => $notificationType,
                                 'notificationMessage' => $notificationMessage,
                                 'isRead' => false,
                                 'typeValueID' => $request->idrequest
@@ -66,28 +71,27 @@ class RequestCommunicationController extends Controller
                         }
                     }
 
-                    //for the sender who have requested the item
-                    $isThereNotif = Notification::where('type', $type)
+                    //To the sender, delete existing notif -> create
+                    $isThereNotif = Notification::where('type', $notificationType)
                     ->where('typeValueID', $request->idrequest)
                     ->where('senderUserId', Auth::id())
                     ->where('recipientUserId', $requests->idrequester);
                     if($isThereNotif) {
                         $isThereNotif->delete();
                     }
-                    $notification = $notificationController->createNotification([
+                    $notification = $notificationController->sendNotification([
                         'recipientUserId' => $requests->idrequester,
                         'senderUserId' => Auth::id(),
-                        'type' => $type,
+                        'type' => $notificationType,
                         'notificationMessage' => $notificationMessage,
                         'isRead' => false,
                         'typeValueID' => $request->idrequest
                     ]);
                 } else {
-                    /*if the sender is not an admin, it will get all the admin and will 
-                    loop the message so that the message will be sent to all admins. **/
+                    //If the sender is not an admin, the message will be sent to all admin
                     $allAdmin = User::where('is_admin', true)->get();
                     foreach($allAdmin as $admin) {
-                        $isThereNotif = Notification::where('type', $type)
+                        $isThereNotif = Notification::where('type', $notificationType)
                         ->where('typeValueID', $request->idrequest)
                         ->where('senderUserId', Auth::id())
                         ->where('recipientUserId', $admin->id);
@@ -95,10 +99,10 @@ class RequestCommunicationController extends Controller
                             $isThereNotif->delete();
                         }
 
-                        $notification = $notificationController->createNotification([
+                        $notification = $notificationController->sendNotification([
                             'recipientUserId' => $admin->id,
                             'senderUserId' => Auth::id(),
-                            'type' => $type,
+                            'type' => $notificationType,
                             'notificationMessage' => $notificationMessage,
                             'isRead' => false,
                             'typeValueID' => $request->idrequest

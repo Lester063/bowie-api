@@ -108,15 +108,19 @@ class ReturnController extends Controller
             }
             //send a notification to all admin
             $user = User::find(Auth::id());
-            $type = 'returning the item';
             $item = Item::find($getrequest->iditem);
-            $notificationMessage = $user->name.' is '.$type.' with item code '.$item->itemcode.' and return id '.$request->idrequest.'.';
+            $notificationType = 'returning the item';
+            $notificationMessage = $notificationController->generateNotificationMessage([
+                'firstName' => $user->first_name,
+                'type' => $notificationType,
+                'itemCode' => $item->itemcode
+            ]);
             $allAdmin = User::where('is_admin', true)->get();
             foreach($allAdmin as $admin) {
-                $notification = $notificationController->createNotification([
+                $notification = $notificationController->sendNotification([
                     'recipientUserId' => $admin->id,
                     'senderUserId' => Auth::id(),
-                    'type' => $type,
+                    'type' => $notificationType,
                     'notificationMessage' => $notificationMessage,
                     'isRead' => false,
                     'typeValueID' => $return->id
@@ -197,13 +201,17 @@ class ReturnController extends Controller
                 ]);
 
                 $approver = User::find(Auth::id());
-                $type = 'approve the return';
-                $notificationMessage = $approver->name.' '.$type.' of the item with code '.$item->itemcode;
+                $notificationType = 'approve the return';
+                $notificationMessage = $notificationController->generateNotificationMessage([
+                    'firstName' => $approver->first_name,
+                    'type' => $notificationType,
+                    'itemCode' => $item->itemcode
+                ]);
 
-                $notification = $notificationController->createNotification([
+                $notification = $notificationController->sendNotification([
                     'recipientUserId' => $return->idreturner,
                     'senderUserId' => Auth::id(),
-                    'type' => $type,
+                    'type' => $notificationType,
                     'notificationMessage' => $notificationMessage,
                     'isRead' => false,
                     'typeValueID' => $id
