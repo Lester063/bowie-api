@@ -19,9 +19,9 @@ class ReturnController extends Controller
     public function indexAdmin()
     {
         //$returns = Returns::all();
-        $returns = Returns::join('requests','requests.id','=','returns.idrequest')
-        ->join('items','items.id','=','requests.iditem')
-        ->join('users', 'users.id','=','returns.idreturner')
+        $returns = Returns::join('requests','requests.id','=','returns.idRequest')
+        ->join('items','items.id','=','requests.idItem')
+        ->join('users', 'users.id','=','returns.idReturner')
         ->select('*','returns.id as id')->orderBy('returns.created_at','desc')->get();
 
         return response()->json([
@@ -32,10 +32,10 @@ class ReturnController extends Controller
     public function indexUser()
     {
         //$returns = Returns::all();
-        $returns = Returns::where('idreturner', Auth::id())
-        ->join('requests','requests.id','=','returns.idrequest')
-        ->join('items','items.id','=','requests.iditem')
-        ->join('users', 'users.id','=','returns.idreturner')
+        $returns = Returns::where('idReturner', Auth::id())
+        ->join('requests','requests.id','=','returns.idRequest')
+        ->join('items','items.id','=','requests.idItem')
+        ->join('users', 'users.id','=','returns.idReturner')
         ->select('*','returns.id as id')
         ->orderBy('returns.created_at','desc')->get();
 
@@ -46,9 +46,9 @@ class ReturnController extends Controller
 
     public function viewReturn($id) {
         $returns = Returns::where('returns.id', $id)
-        ->join('requests','requests.id','=','returns.idrequest')
-        ->join('items','items.id','=','requests.iditem')
-        ->join('users', 'users.id','=','returns.idreturner')
+        ->join('requests','requests.id','=','returns.idRequest')
+        ->join('items','items.id','=','requests.idItem')
+        ->join('users', 'users.id','=','returns.idReturner')
         ->select('*','returns.id as id')
         ->orderBy('returns.created_at','desc')->get();
 
@@ -72,11 +72,11 @@ class ReturnController extends Controller
     {
         $notificationController = new \App\Http\Controllers\Api\NotificationController;
 
-        $getrequest = Requests::find($request->idrequest);
+        $getrequest = Requests::find($request['idRequest']);
         // var $hasReturnPending = false;
 
-        $hasPendingReturn = Returns::where('idrequest', $request->idrequest)
-        ->where('is_approve', 0)->count();
+        $hasPendingReturn = Returns::where('idRequest', $request['idRequest'])
+        ->where('isApprove', 0)->count();
         // foreach($getrequest)
 
         if(!$getrequest) {
@@ -84,7 +84,7 @@ class ReturnController extends Controller
                 'message' => 'Unable to find the request.',
             ], 422);
         } 
-        else if($getrequest->idrequester != Auth::id()) {
+        else if($getrequest['idRequester'] != Auth::id()) {
             return response()->json([
                 'message' => 'You cannot return this item.',
             ], 422);
@@ -96,34 +96,34 @@ class ReturnController extends Controller
         }
         else {
             $return = Returns::create([
-                'idrequest' => $request->idrequest,
-                'idreturner' => Auth::id(),
-                'is_approve' => false,
+                'idRequest' => $request['idRequest'],
+                'idReturner' => Auth::id(),
+                'isApprove' => false,
             ]);
 
             if($return) {
                 $getrequest->update([
-                    'isreturnsent' => true
+                    'isReturnSent' => true
                 ]);
             }
             //send a notification to all admin
             $user = User::find(Auth::id());
-            $item = Item::find($getrequest->iditem);
+            $item = Item::find($getrequest['idItem']);
             $notificationType = 'returning the item';
             $notificationMessage = $notificationController->generateNotificationMessage([
-                'firstName' => $user->first_name,
+                'firstName' => $user['firstName'],
                 'type' => $notificationType,
-                'itemCode' => $item->itemcode
+                'itemCode' => $item['itemCode']
             ]);
-            $allAdmin = User::where('is_admin', true)->get();
+            $allAdmin = User::where('isAdmin', true)->get();
             foreach($allAdmin as $admin) {
                 $notification = $notificationController->sendNotification([
-                    'recipientUserId' => $admin->id,
+                    'recipientUserId' => $admin['id'],
                     'senderUserId' => Auth::id(),
                     'type' => $notificationType,
                     'notificationMessage' => $notificationMessage,
                     'isRead' => false,
-                    'typeValueID' => $return->id
+                    'typeValueId' => $return['id']
                 ]);
             }
 
@@ -177,44 +177,44 @@ class ReturnController extends Controller
                 'message' => 'Unable to find the return request.',
             ], 422);
         }
-        else if($return->is_approve) {
+        else if($return['isApprove']) {
             return response()->json([
                 'message' => 'Return request is already approved.',
             ], 200);
         }
         else {
             $return->update([
-                'is_approve' => true
+                'isApprove' => true
             ]);
             
             $returnnewdata = Returns::find($id);
-            if($returnnewdata->is_approve) {
-                $requests = Requests::find($return->idrequest);
-                $item = Item::find($requests->iditem);
+            if($returnnewdata['isApprove']) {
+                $requests = Requests::find($return['idRequest']);
+                $item = Item::find($requests['idItem']);
 
                 $item->update([
-                    'is_available' => true
+                    'isAvailable' => true
                 ]);
 
                 $requests->update([
-                    'statusrequest' => 'Completed'
+                    'statusRequest' => 'Completed'
                 ]);
 
                 $approver = User::find(Auth::id());
                 $notificationType = 'approve the return';
                 $notificationMessage = $notificationController->generateNotificationMessage([
-                    'firstName' => $approver->first_name,
+                    'firstName' => $approver['firstName'],
                     'type' => $notificationType,
-                    'itemCode' => $item->itemcode
+                    'itemCode' => $item['itemCode']
                 ]);
 
                 $notification = $notificationController->sendNotification([
-                    'recipientUserId' => $return->idreturner,
+                    'recipientUserId' => $return['idReturner'],
                     'senderUserId' => Auth::id(),
                     'type' => $notificationType,
                     'notificationMessage' => $notificationMessage,
                     'isRead' => false,
-                    'typeValueID' => $id
+                    'typeValueId' => $id
                 ]);
             }
 

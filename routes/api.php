@@ -61,7 +61,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 });
 
-Route::middleware('auth:sanctum', 'is_admin')->group(function(){
+Route::middleware('auth:sanctum', 'isAdmin')->group(function(){
 
     Route::post('items', [ItemController::class,'store']);
     Route::get('items/{id}/edit', [ItemController::class,'edit']);

@@ -17,11 +17,11 @@ class RequestCommunicationController extends Controller
         $notificationController = new \App\Http\Controllers\Api\NotificationController;
         $validator = Validator::make($request->all(),[
             //validates if idrequest does exist on requests table -id
-            'idrequest' => 'required|string|exists:requests,id',
+            'idRequest' => 'required|string|exists:requests,id',
             'message' => 'required|string|max:255',
         ]);
 
-        $requests = Requests::find($request->idrequest);
+        $requests = Requests::find($request['idRequest']);
         $user = User::find(Auth::id());
 
         if($validator->fails()) {
@@ -30,9 +30,9 @@ class RequestCommunicationController extends Controller
             ],422);
         }
         else {
-            if($requests->idrequester != Auth::id() && !$user->is_admin) {
+            if($requests['idRequester'] != Auth::id() && !$user['isAdmin']) {
                 return response()->json([
-                    'requestsid' => $requests->idrequester,
+                    'requestsid' => $requests['idRequester'],
                     'error' => 'You are not allowed to send a message with this request.',
                 ],422);
             }
@@ -40,86 +40,86 @@ class RequestCommunicationController extends Controller
             else {
                 $notificationType = 'sent a message';
                 $notificationMessage = $notificationController->generateNotificationMessage([
-                    'firstName' => $user->first_name,
+                    'firstName' => $user['firstName'],
                     'type' => $notificationType,
-                    'requestID' => $requests->id
+                    'requestID' => $requests['id']
                 ]);
 
                 //if sender is an admin
-                if($user->is_admin) {
+                if($user['isAdmin']) {
                     //for the other admin aside from the admin sender, if there are any
-                    $isThereOtherAdmin = User::where('is_admin', true)->where('id', '!=', Auth::id())->get();
+                    $isThereOtherAdmin = User::where('isAdmin', true)->where('id', '!=', Auth::id())->get();
                     if($isThereOtherAdmin) {
                         foreach($isThereOtherAdmin as $otherAdmin) {
                             //loop each admin -> delete existing notif related to this request -> create
                             $isOtherAdminHasNotif = Notification::where('type', $notificationType)
-                            ->where('typeValueID', $request->idrequest)
+                            ->where('typeValueId', $request['idRequest'])
                             ->where('senderUserId', Auth::id())
-                            ->where('recipientUserId', $otherAdmin->id);
+                            ->where('recipientUserId', $otherAdmin['id']);
                             if($isOtherAdminHasNotif) {
                                 $isOtherAdminHasNotif->delete();
                             }
 
                             $notification = $notificationController->sendNotification([
-                                'recipientUserId' => $otherAdmin->id,
+                                'recipientUserId' => $otherAdmin['id'],
                                 'senderUserId' => Auth::id(),
                                 'type' => $notificationType,
                                 'notificationMessage' => $notificationMessage,
                                 'isRead' => false,
-                                'typeValueID' => $request->idrequest
+                                'typeValueId' => $request['idRequest']
                             ]);
                         }
                     }
 
                     //To the sender, delete existing notif -> create
                     $isThereNotif = Notification::where('type', $notificationType)
-                    ->where('typeValueID', $request->idrequest)
+                    ->where('typeValueId', $request['idRequest'])
                     ->where('senderUserId', Auth::id())
-                    ->where('recipientUserId', $requests->idrequester);
+                    ->where('recipientUserId', $requests['idRequester']);
                     if($isThereNotif) {
                         $isThereNotif->delete();
                     }
                     $notification = $notificationController->sendNotification([
-                        'recipientUserId' => $requests->idrequester,
+                        'recipientUserId' => $requests['idRequester'],
                         'senderUserId' => Auth::id(),
                         'type' => $notificationType,
                         'notificationMessage' => $notificationMessage,
                         'isRead' => false,
-                        'typeValueID' => $request->idrequest
+                        'typeValueId' => $request['idRequest']
                     ]);
                 } else {
                     //If the sender is not an admin, the message will be sent to all admin
-                    $allAdmin = User::where('is_admin', true)->get();
+                    $allAdmin = User::where('isAdmin', true)->get();
                     foreach($allAdmin as $admin) {
                         $isThereNotif = Notification::where('type', $notificationType)
-                        ->where('typeValueID', $request->idrequest)
+                        ->where('typeValueId', $request['idRequest'])
                         ->where('senderUserId', Auth::id())
-                        ->where('recipientUserId', $admin->id);
+                        ->where('recipientUserId', $admin['id']);
                         if($isThereNotif) {
                             $isThereNotif->delete();
                         }
 
                         $notification = $notificationController->sendNotification([
-                            'recipientUserId' => $admin->id,
+                            'recipientUserId' => $admin['id'],
                             'senderUserId' => Auth::id(),
                             'type' => $notificationType,
                             'notificationMessage' => $notificationMessage,
                             'isRead' => false,
-                            'typeValueID' => $request->idrequest
+                            'typeValueId' => $request['idRequest']
                         ]);
                     }
                 }
 
                 //send message
                 $sendmessage = RequestCommunication::create([
-                    'idrequest' => $request->input('idrequest'),
-                    'message' => $request->input('message'),
-                    'idsender' => Auth::id(),
+                    'idRequest' => $request['idRequest'],
+                    'message' => $request['message'],
+                    'idSender' => Auth::id(),
                 ]);
                 
                 return response()->json([
                     'message' => 'Message sent successfully.',
-                    'sendername' => $user->first_name,
+                    'sendername' => $user['firstName'],
                     'data' => $sendmessage,
                     'notification' => $notification
                 ], 200);
@@ -129,7 +129,7 @@ class RequestCommunicationController extends Controller
     }
 
     public function show($id) {
-        //add idrequester to reqcomm and validate if id is equal to Auth
+        //add idRequester to reqcomm and validate if id is equal to Auth
         $getRequest = Requests::find($id);
         $user = User::find(Auth::id());
         if(!$getRequest) {
@@ -138,20 +138,20 @@ class RequestCommunicationController extends Controller
             ], 422);
         }
         else {
-            $comms = RequestCommunication::where('idrequest', $id)
-            ->join('users','users.id', '=', 'request_communications.idsender')
+            $comms = RequestCommunication::where('idRequest', $id)
+            ->join('users','users.id', '=', 'request_communications.idSender')
             ->select('*', 'request_communications.id as id',
             'request_communications.created_at as created_at',
             'request_communications.updated_at as updated_at'
             )->get();
             $checkAuth = false;
             foreach($comms as $comm) {
-                if($comm->idsender == Auth::id()) {
+                if($comm['idSender'] == Auth::id()) {
                     $checkAuth = true;
                 }
             }
     
-            if(!$checkAuth && !$user->is_admin && $getRequest->idrequester != Auth::id()) {
+            if(!$checkAuth && !$user['isAdmin'] && $getRequest['idRequester'] != Auth::id()) {
                 return response()->json([
                     'message' => 'You are not allowed to view the messages on this request.',
                 ], 422);
@@ -159,7 +159,7 @@ class RequestCommunicationController extends Controller
             else {
                 $this->readUnreadMessage($id);
                 return response()->json([
-                    'statusrequest' => $getRequest->statusrequest,
+                    'statusRequest' => $getRequest['statusRequest'],
                     'data' => $comms,
                 ], 200);
             }
@@ -167,15 +167,15 @@ class RequestCommunicationController extends Controller
     }
 
     public function readUnreadMessage($id) {
-        $unreadMessages = RequestCommunication::where('idrequest', $id)
-        ->where('idsender', '!=', Auth::id())
+        $unreadMessages = RequestCommunication::where('idRequest', $id)
+        ->where('idSender', '!=', Auth::id())
         ->where('isRead', false)->get();
         $checkAuth = false;
         $user = User::find(Auth::id());
         $getRequest = Requests::find($id);
 
         if($getRequest) {
-            if(!$user->is_admin && $getRequest->idrequester != Auth::id()) {
+            if(!$user['isAdmin'] && $getRequest['idRequester'] != Auth::id()) {
                 return response()->json([
                     'message' => 'You are not allowed to view the messages on this request.',
                 ], 422);

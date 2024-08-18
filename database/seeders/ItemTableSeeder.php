@@ -14,24 +14,24 @@ class ItemTableSeeder extends Seeder
     public function run(): void
     {
         Item::create([
-            'itemname' => 'NVISION Monitor',
-            'itemcode' => 'NVM1',
-            'item_image' => null,
-            'is_available' => true,
+            'itemName' => 'NVISION Monitor',
+            'itemCode' => 'NVM1',
+            'itemImage' => null,
+            'isAvailable' => true,
         ]);
 
         Item::create([
-            'itemname' => 'NVISION Monitor',
-            'itemcode' => 'NVM2',
-            'item_image' => null,
-            'is_available' => true,
+            'itemName' => 'NVISION Monitor',
+            'itemCode' => 'NVM2',
+            'itemImage' => null,
+            'isAvailable' => true,
         ]);
 
         Item::create([
-            'itemname' => 'NK Keyboard',
-            'itemcode' => 'NKK1',
-            'item_image' => null,
-            'is_available' => true,
+            'itemName' => 'NK Keyboard',
+            'itemCode' => 'NKK1',
+            'itemImage' => null,
+            'isAvailable' => true,
         ]);
     }
 }

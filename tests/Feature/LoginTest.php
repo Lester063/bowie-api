@@ -23,7 +23,7 @@ class LoginTest extends TestCase
             ->assertJson([
                 'message' => 'success',
                 'data' => [
-                    'is_admin' => 1
+                    'isAdmin' => 1
                 ]
             ]);
     }
@@ -40,7 +40,7 @@ class LoginTest extends TestCase
             ->assertJson([
                 'message' => 'success',
                 'data' => [
-                    'is_admin' => 0
+                    'isAdmin' => 0
                 ]
             ]);
     }

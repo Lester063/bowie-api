@@ -19,8 +19,8 @@ class RequestController extends Controller
      */
     public function indexAdmin()
     {
-        $requests = Requests::join('items', 'items.id', '=', 'requests.iditem')
-        ->join('users','users.id','=','requests.idrequester')
+        $requests = Requests::join('items', 'items.id', '=', 'requests.idItem')
+        ->join('users','users.id','=','requests.idRequester')
         ->select('*','requests.id as id')->orderBy('requests.created_at','desc')->get();
 
         return response()->json([
@@ -32,10 +32,9 @@ class RequestController extends Controller
 
     public function indexUser()
     {
-        //need to check, unable to get some request because the item is deleted, need to add is_deleted column in items table
-        $requests = Requests::where('idrequester', Auth::id())
-        ->join('items', 'items.id', '=', 'requests.iditem')
-        ->join('users','users.id','=','requests.idrequester')
+        $requests = Requests::where('idRequester', Auth::id())
+        ->join('items', 'items.id', '=', 'requests.idItem')
+        ->join('users','users.id','=','requests.idRequester')
         ->select('*','requests.id as id')->orderBy('requests.created_at','desc')->get();
 
         return response()->json([
@@ -46,8 +45,8 @@ class RequestController extends Controller
 
     public function viewRequest($id) {
         $requests = Requests::where('requests.id', $id)
-        ->join('items', 'items.id', '=', 'requests.iditem')
-        ->join('users','users.id','=','requests.idrequester')
+        ->join('items', 'items.id', '=', 'requests.idItem')
+        ->join('users','users.id','=','requests.idRequester')
         ->select('*','requests.id as id')->orderBy('requests.created_at','desc')->get();
 
         return response()->json([
@@ -61,9 +60,9 @@ class RequestController extends Controller
         $notificationController = new \App\Http\Controllers\Api\NotificationController;
 
         $validator = Validator::make($request->all(),[
-            'idrequester' => 'required|string|max:8|exists:users,id',
-            'iditem' => 'required|string|max:8|exists:items,id',
-            'statusrequest' => 'required',
+            'idRequester' => 'required|string|max:8|exists:users,id',
+            'idItem' => 'required|string|max:8|exists:items,id',
+            'statusRequest' => 'required',
         ]);
 
         if($validator->fails()) {
@@ -72,12 +71,12 @@ class RequestController extends Controller
                 'errors' => $validator->messages()
             ], 422);
         } else {
-            $getItem = Item::find($request->iditem);
-            $isItemAvailable = $getItem->is_available;
+            $getItem = Item::find($request['idItem']);
+            $isItemAvailable = $getItem['isAvailable'];
 
-            $userRequestPendingCount = Requests::where('iditem', $request->iditem)
-            ->where('idrequester', $request->idrequester)
-            ->where('statusrequest', 'Pending')->count();
+            $userRequestPendingCount = Requests::where('idItem', $request['idItem'])
+            ->where('idRequester', $request['idRequester'])
+            ->where('statusRequest', 'Pending')->count();
             if(!$isItemAvailable) {
                 return response()->json([
                     'status' => 422,
@@ -92,30 +91,30 @@ class RequestController extends Controller
             }
             else {
                 $requestdata = Requests::create([
-                    'idrequester' => $request->input('idrequester'),
-                    'iditem' => $request->input('iditem'),
-                    'statusrequest' => $request->input('statusrequest'),
-                    'isreturnsent' => false,
+                    'idRequester' => $request['idRequester'],
+                    'idItem' => $request['idItem'],
+                    'statusRequest' => $request['statusRequest'],
+                    'isReturnSent' => false,
                 ]);
                 //send a notification to all admin
                 $user = User::find(Auth::id());
                 //e.g Lester is requesting the item OGE
                 $notificationType = 'requesting the item';
                 $notificationMessage = $notificationController->generateNotificationMessage([
-                    'firstName' => $user->first_name,
+                    'firstName' => $user['firstName'],
                     'type' => $notificationType,
-                    'itemCode' => $getItem->itemcode
+                    'itemCode' => $getItem['itemCode']
                 ]);
                 
-                $allAdmin = User::where('is_admin', true)->get();
+                $allAdmin = User::where('isAdmin', true)->get();
                 foreach($allAdmin as $admin) {
                     $notification = $notificationController->sendNotification([
-                        'recipientUserId' => $admin->id,
+                        'recipientUserId' => $admin['id'],
                         'senderUserId' => Auth::id(),
                         'type' => $notificationType,
                         'notificationMessage' => $notificationMessage,
                         'isRead' => false,
-                        'typeValueID' => $requestdata->id
+                        'typeValueId' => $requestdata['id']
                     ]);
                 }
     
@@ -165,27 +164,27 @@ class RequestController extends Controller
         $notificationController = new \App\Http\Controllers\Api\NotificationController;
 
         $requests = Requests::find($id);
-        $allrequests = Requests::where('iditem', $requests->iditem)->where('statusrequest', 'Pending')->get();
-        $item = Item::find($requests->iditem);
+        $allrequests = Requests::where('idItem', $requests['idItem'])->where('statusRequest', 'Pending')->get();
+        $item = Item::find($requests->idItem);
 
         if(!$requests) {
             return response()->json([
                 'message' => 'Unable to find the request.'
             ],422);
         }
-        else if($requests->statusrequest === 'Closed') {
+        else if($requests['statusRequest'] === 'Closed') {
             return response()->json([
                 'message' => 'Unable to make any action.'
             ],422);
         }
-        else if($item->is_deleted) {
+        else if($item['isDeleted']) {
             return response()->json([
                 'message' => 'Item is deleted.'
             ],422);
         }
         else {
-            $item = Item::find($requests->iditem);
-            if(!$item->is_available) {
+            $item = Item::find($requests['idItem']);
+            if(!$item['isAvailable']) {
                 return response()->json([
                     'message' => 'Item is not available at the moment.'
                 ],422);
@@ -194,68 +193,68 @@ class RequestController extends Controller
 
                 $approver = User::find(Auth::id());
 
-                if($request->action==='Approving') {
+                if($request['action']==='Approving') {
                     foreach($allrequests as $singlerequest){
-                        if($singlerequest->id !== $requests->id) {
+                        if($singlerequest['id'] !== $requests['id']) {
                             $singlerequest->update([
-                                'statusrequest' => 'Closed'
+                                'statusRequest' => 'Closed'
                             ]);
     
                             RequestCommunication::create([
-                                'idrequest' => $singlerequest->id,
+                                'idRequest' => $singlerequest['id'],
                                 'message' => 'The item you have requested has been processed to other User. 
                                  Therefore, this request will be closed, thank you.',
-                                'idsender' => Auth::id(),
+                                'idSender' => Auth::id(),
                             ]);
 
                             //unable to make a real time notif because we do not return a response each loop
                             //e.g Lester close the request of item OGE
                             $notificationType = 'close the request';
                             $notificationMessage = $notificationController->generateNotificationMessage([
-                                'firstName' => $approver->first_name,
+                                'firstName' => $approver['firstName'],
                                 'type' => $notificationType,
-                                'itemCode' => $item->itemcode
+                                'itemCode' => $item['itemCode']
                             ]);
 
                             $notification = $notificationController->sendNotification([
-                                'recipientUserId' => $singlerequest->idrequester,
+                                'recipientUserId' => $singlerequest['idRequester'],
                                 'senderUserId' => Auth::id(),
                                 'type' => $notificationType,
                                 'notificationMessage' => $notificationMessage,
                                 'isRead' => false,
-                                'typeValueID' => $id
+                                'typeValueId' => $id
                             ]);
 
                         }
                     }
 
                     $requests->update([
-                        'statusrequest' => 'Approved'
+                        'statusRequest' => 'Approved'
                     ]);
 
                     RequestCommunication::create([
-                        'idrequest' => $id,
+                        'idRequest' => $id,
                         'message' => 'Your request for this item has been approved.',
-                        'idsender' => Auth::id(),
+                        'idSender' => Auth::id(),
                     ]);
                     //e.g Lester approve the request of item OGE
                     $notificationType = 'approve the request';
                     $notificationMessage = $notificationController->generateNotificationMessage([
-                        'firstName' => $approver->first_name,
+                        'firstName' => $approver['firstName'],
                         'type' => $notificationType,
-                        'itemCode' => $item->itemcode
+                        'itemCode' => $item['itemCode']
                     ]);
                     $notification = $notificationController->sendNotification([
-                        'recipientUserId' => $requests->idrequester,
+                        'recipientUserId' => $requests['idRequester'],
                         'senderUserId' => Auth::id(),
                         'type' => $notificationType,
                         'notificationMessage' => $notificationMessage,
                         'isRead' => false,
-                        'typeValueID' => $id
+                        'typeValueId' => $id
                     ]);
 
                     $item->update([
-                        'is_available' => false
+                        'isAvailable' => false
                     ]);
 
                     $requestnewdata = Requests::find($id);
@@ -267,23 +266,23 @@ class RequestController extends Controller
                 }
                 else if($request->action==='Declining') {
                     $requests->update([
-                        'statusrequest' => 'Declined'
+                        'statusRequest' => 'Declined'
                     ]);
 
                     //e.g Lester decline the request of item OGE
                     $notificationType = 'decline the request';
                     $notificationMessage = $notificationController->generateNotificationMessage([
-                        'firstName' => $approver->first_name,
+                        'firstName' => $approver['firstName'],
                         'type' => $notificationType,
-                        'itemCode' => $item->itemcode
+                        'itemCode' => $item['itemCode']
                     ]);
                     $notification = $notificationController->sendNotification([
-                        'recipientUserId' => $requests->idrequester,
+                        'recipientUserId' => $requests['idRequester'],
                         'senderUserId' => Auth::id(),
                         'type' => $notificationType,
                         'notificationMessage' => $notificationMessage,
                         'isRead' => false,
-                        'typeValueID' => $id
+                        'typeValueId' => $id
                     ]);
 
                     $requestnewdata = Requests::find($id);
@@ -295,7 +294,7 @@ class RequestController extends Controller
                 }
                 else if($request->action==='Closing') {
                     $requests->update([
-                        'statusrequest' => 'Closed'
+                        'statusRequest' => 'Closed'
                     ]);
 
                 }

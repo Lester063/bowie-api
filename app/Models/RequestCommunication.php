@@ -10,14 +10,14 @@ class RequestCommunication extends Model
     use HasFactory;
 
     protected $fillable = [
-        'idrequest',
-        'idsender',
+        'idRequest',
+        'idSender',
         'message',
         'isRead',
     ];
 
     protected $hidden = [
         'password',
-        'is_admin'
+        'isAdmin'
     ];
 }

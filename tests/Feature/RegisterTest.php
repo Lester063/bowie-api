@@ -12,9 +12,9 @@ class RegisterTest extends TestCase
     
     public function testRegisterSuccessUserAccount() {
         $data = [
-            'first_name' => 'Test Name',
-            'middle_name' => 'Test',
-            'last_name' => 'Admin',
+            'firstName' => 'Test Name',
+            'middleName' => 'Test',
+            'lastName' => 'Admin',
             'email' => 'test@gmail.com',
             'password' => 'admin123'
         ];
@@ -23,7 +23,7 @@ class RegisterTest extends TestCase
         $response = $this->post('http://localhost:8000/api/register', $data);
         //assert
         $response->assertStatus(200);
-        $this->assertTrue($response['data']['first_name'] == 'Test Name');
+        $this->assertTrue($response['data']['firstName'] == 'Test Name');
 
         //delete test data
         $this->testDeleteUser($response['data']['id']);
@@ -31,17 +31,17 @@ class RegisterTest extends TestCase
 
     public function testRegisterDuplicateEmail() {
         $data1 = [
-            'first_name' => 'Test Name1',
-            'middle_name' => 'Test1',
-            'last_name' => 'Admin1',
+            'firstName' => 'Test Name1',
+            'middleName' => 'Test1',
+            'lastName' => 'Admin1',
             'email' => 'test@gmail.com',
             'password' => 'admin123'
         ];
 
         $data2 = [
-            'first_name' => 'Test Name2',
-            'middle_name' => 'Test2',
-            'last_name' => 'Admin2',
+            'firstName' => 'Test Name2',
+            'middleName' => 'Test2',
+            'lastName' => 'Admin2',
             'email' => 'test@gmail.com',
             'password' => 'admin123'
         ];
@@ -60,9 +60,9 @@ class RegisterTest extends TestCase
 
     public function testRegisterInvalidEmail() {
         $data = [
-            'first_name' => 'Test Name',
-            'middle_name' => 'Test',
-            'last_name' => 'Admin',
+            'firstName' => 'Test Name',
+            'middleName' => 'Test',
+            'lastName' => 'Admin',
             'email' => 'test.com',
             'password' => 'admin123'
         ];
@@ -83,9 +83,9 @@ class RegisterTest extends TestCase
 
     public function testRegisterNoEmail() {
         $data = [
-            'first_name' => 'Test Name',
-            'middle_name' => 'Test',
-            'last_name' => 'Admin',
+            'firstName' => 'Test Name',
+            'middleName' => 'Test',
+            'lastName' => 'Admin',
             'email' => '',
             'password' => 'admin123'
         ];
@@ -106,9 +106,9 @@ class RegisterTest extends TestCase
 
     public function testRegisterNoPassword() {
         $data = [
-            'first_name' => 'Test Name',
-            'middle_name' => 'Test',
-            'last_name' => 'Admin',
+            'firstName' => 'Test Name',
+            'middleName' => 'Test',
+            'lastName' => 'Admin',
             'email' => 'test@gmail.com',
             'password' => ''
         ];

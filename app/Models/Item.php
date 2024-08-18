@@ -12,10 +12,10 @@ class Item extends Model
     protected $table ='items';
 
     protected $fillable = [
-        'itemname',
-        'itemcode',
-        'item_image',
-        'is_available',
-        'is_deleted',
+        'itemName',
+        'itemCode',
+        'itemImage',
+        'isAvailable',
+        'isDeleted',
     ];
 }

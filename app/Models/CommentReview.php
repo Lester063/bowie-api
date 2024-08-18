@@ -12,12 +12,12 @@ class CommentReview extends Model
     protected $fillable = [
         'rating',
         'comment',
-        'idrequest'
+        'idRequest'
     ];
 
     protected $hidden = [
         'password',
-        'is_admin',
-        'isreturnsent',
+        'isAdmin',
+        'isReturnSent',
     ];
 }
