@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Validator;
 class ItemController extends Controller
 {
     public function index() {
-        $items = Item::where('is_deleted', false)->get();
+        $items = Item::where('isDeleted', false)->get();
         return response()->json([
             'status' => 200,
             'data' => $items
@@ -22,9 +22,9 @@ class ItemController extends Controller
 
     public function store(Request $request) {
         $validator = Validator::make($request->all(),[
-            'itemname' => 'required|string|max:191',
-            'itemcode' => 'required|string|max:191',
-            'item_image' => 'file|mimes:jpg,jpeg,png|max:2058',
+            'itemName' => 'required|string|max:191',
+            'itemCode' => 'required|string|max:191',
+            'itemImage' => 'file|mimes:jpg,jpeg,png|max:2058',
         ]);
 
         if($validator->fails()) {
@@ -33,19 +33,19 @@ class ItemController extends Controller
                 'errors' => $validator->messages()
             ], 422);
         }
-        else if($this->verifyCodeIfExisting($request->itemcode, null)) {
+        else if($this->verifyCodeIfExisting($request['itemCode'], null)) {
             return response()->json([
                 'status' => 422,
-                'errors' => ['itemcode' => 'Item code is already taken.'],
+                'errors' => ['itemCode' => 'Item code is already taken.'],
             ], 422);
         }
 
         else {
-            $image_path = $this->generateImagePath($request->item_image);
+            $imagePath = $this->generateImagePath($request['itemImage']);
             $items = Item::create([
-                'itemname' => $request->itemname,
-                'itemcode' => $request->itemcode,
-                'item_image' => $image_path,
+                'itemName' => $request['itemName'],
+                'itemCode' => $request['itemCode'],
+                'itemImage' => $imagePath,
             ]);
         }
 
@@ -104,8 +104,8 @@ class ItemController extends Controller
             ], 404);
         } else {
             $validator = Validator::make($request->all(),[
-                'itemname' => 'required|string|max:191',
-                'itemcode' => 'required|string|max:191|',
+                'itemName' => 'required|string|max:191',
+                'itemCode' => 'required|string|max:191|',
             ]);
             if($validator->fails()) {
                 return response()->json([
@@ -113,20 +113,20 @@ class ItemController extends Controller
                     'errors' => $validator->messages()
                 ], 422);
             }
-            else if($this->verifyCodeIfExisting($request->itemcode, $id)) {
+            else if($this->verifyCodeIfExisting($request['itemCode'], $id)) {
                 return response()->json([
                     'status' => 422,
                     'errors' => [
-                        'itemcode' => 'Item code is already taken.'
+                        'itemCode' => 'Item code is already taken.'
                     ],
                 ], 422);
             }
             else {
-                $image_path = $this->generateImagePath($request->item_image);
+                $imagePath = $this->generateImagePath($request['itemImage']);
                 $item->update([
-                    'itemname' => $request->itemname,
-                    'itemcode' => $request->itemcode,
-                    'item_image' => $image_path,
+                    'itemName' => $request['itemName'],
+                    'itemCode' => $request['itemCode'],
+                    'itemImage' => $imagePath == null ? $item['itemImage'] : $imagePath,
                 ]);
                 $newdata = Item::find($id);
                 return response()->json([
@@ -148,7 +148,7 @@ class ItemController extends Controller
         }
         else {
             $item->update([
-                'is_deleted' => true
+                'isDeleted' => true
             ]);
 
             if($item) {
@@ -168,8 +168,8 @@ class ItemController extends Controller
 
     public function itemRequest($id) {
         $item = Item::find($id);
-        $getAllItemRequest = Requests::where('iditem', $id)->get();
-        $getPendingItemRequest = Requests::where('iditem', $id)->where('statusrequest', 'Pending')->get();
+        $getAllItemRequest = Requests::where('idItem', $id)->get();
+        $getPendingItemRequest = Requests::where('idItem', $id)->where('statusRequest', 'Pending')->get();
 
         if($item) {
             return response()->json([
@@ -187,9 +187,9 @@ class ItemController extends Controller
     }
 
     //we pass $id parameter for the verification when editing, null if creating
-    public function verifyCodeIfExisting($itemcode, $id) {
+    public function verifyCodeIfExisting($itemCode, $id) {
         if(!is_null($id)) {
-            if(Item::where('itemcode', $itemcode)->where('id','!=',$id)->count() > 0) {
+            if(Item::where('itemCode', $itemCode)->where('id','!=',$id)->count() > 0) {
                 return true;
             }
             else {
@@ -197,7 +197,7 @@ class ItemController extends Controller
             }
         }
         else {
-            if(Item::where('itemcode', $itemcode)->count() > 0) {
+            if(Item::where('itemCode', $itemCode)->count() > 0) {
                 return true;
             }
             else {
@@ -206,13 +206,13 @@ class ItemController extends Controller
         }
     }
 
-    public function generateImagePath($item_image) {
-        if($item_image) {
-            $image_path = $item_image->store('image', 'public');
+    public function generateImagePath($itemImage) {
+        if($itemImage) {
+            $imagePath = $itemImage->store('image', 'public');
         }
         else {
-            $image_path = null;
+            $imagePath = null;
         }
-        return $image_path;
+        return $imagePath;
     }
 }

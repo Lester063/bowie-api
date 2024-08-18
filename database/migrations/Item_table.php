@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('items', function (Blueprint $table) {
             $table->id();
-            $table->string('itemname');
-            $table->string('itemcode');
-            $table->string('item_image')->nullable();
-            $table->boolean('is_available')->default(true);
-            $table->boolean('is_deleted')->default(false);
+            $table->string('itemName');
+            $table->string('itemCode');
+            $table->string('itemImage')->nullable();
+            $table->boolean('isAvailable')->default(true);
+            $table->boolean('isDeleted')->default(false);
             $table->timestamps();
         });
     }

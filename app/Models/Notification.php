@@ -14,7 +14,7 @@ class Notification extends Model
         'senderUserId',
         'type',
         'isRead',
-        'typeValueID',
+        'typeValueId',
         'notificationMessage'
     ];
 }

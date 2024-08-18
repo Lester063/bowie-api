@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('requests', function (Blueprint $table) {
             $table->id();
-            $table->string('idrequester');
-            $table->string('iditem');
-            $table->string('statusrequest');
-            $table->boolean('isreturnsent')->default(false);
+            $table->string('idRequester');
+            $table->string('idItem');
+            $table->string('statusRequest');
+            $table->boolean('isReturnSent')->default(false);
             $table->timestamps();
         });
     }

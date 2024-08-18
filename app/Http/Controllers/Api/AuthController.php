@@ -15,9 +15,9 @@ class AuthController extends Controller
 {
     public function register(Request $request) {
         $validator = Validator::make($request->all(),[
-            'first_name' => 'required|string|max:32',
-            'middle_name' => 'max:32',
-            'last_name' => 'required|string|max:32',
+            'firstName' => 'required|string|max:32',
+            'middleName' => 'max:32',
+            'lastName' => 'required|string|max:32',
             'email' => 'required|email|max:32|unique:'.User::class,
             'password' => 'required|min:8',
         ]);
@@ -29,12 +29,12 @@ class AuthController extends Controller
             ], 422);
         } else {
             $user = User::create([
-                'first_name' => $request->input('first_name'),
-                'middle_name' => $request->input('middle_name'),
-                'last_name' => $request->input('last_name'),
-                'email' => $request->input('email'),
-                'password' => Hash::make($request->input('password')),
-                'is_admin' => false, // new users are automatically not admin
+                'firstName' => $request['firstName'],
+                'middleName' => $request['middleName'],
+                'lastName' => $request['lastName'],
+                'email' => $request['email'],
+                'password' => Hash::make($request['password']),
+                'isAdmin' => false, // new users are automatically not admin
             ]);
         }
 
@@ -83,17 +83,17 @@ class AuthController extends Controller
         $user = User::find(Auth::id());
         if($user) {
             $this->validate($request, [
-                'profile_image' => 'file|mimes:jpg,jpeg,png|max:2058',
+                'profileImage' => 'file|mimes:jpg,jpeg,png|max:2058',
             ]);
-            $image_path = $request->file('profile_image')->store('image', 'public');
+            $imagePath = $request->file('profileImage')->store('image', 'public');
     
             $user->update([
-                'profile_image' => $image_path,
+                'profileImage' => $imagePath,
             ]);
     
             return response()->json([
                 'message' => 'Success',
-                'path' => $image_path
+                'path' => $imagePath
             ], 200);
         }
         else {

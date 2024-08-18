@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('request_communications', function (Blueprint $table) {
             $table->id();
-            $table->string('idrequest');
-            $table->string('idsender');
+            $table->string('idRequest');
+            $table->string('idSender');
             $table->string('message');
             $table->boolean('isRead')->default(false);
             $table->timestamps();

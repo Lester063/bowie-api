@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('returns', function (Blueprint $table) {
             $table->id();
-            $table->string('idrequest');
-            $table->string('idreturner');
-            $table->boolean('is_approve');
-            $table->boolean('is_reviewed')->default(false);
+            $table->string('idRequest');
+            $table->string('idReturner');
+            $table->boolean('isApprove');
+            $table->boolean('isReviewed')->default(false);
             $table->timestamps();
         });
     }

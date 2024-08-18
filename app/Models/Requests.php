@@ -10,14 +10,14 @@ class Requests extends Model
     use HasFactory;
 
     protected $fillable = [
-        'idrequester',
-        'iditem',
-        'statusrequest',
-        'isreturnsent'
+        'idRequester',
+        'idItem',
+        'statusRequest',
+        'isReturnSent'
     ];
 
     protected $hidden = [
         'password',
-        'is_admin'
+        'isAdmin'
     ];
 }

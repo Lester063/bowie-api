@@ -10,18 +10,18 @@ class Returns extends Model
     use HasFactory;
 
     protected $fillable = [
-        'idrequest',
-        'idreturner',
-        'is_approve',
-        'is_reviewed'
+        'idRequest',
+        'idReturner',
+        'isApprove',
+        'isReviewed'
     ];
 
     protected $hidden = [
         'password',
-        'is_admin',
-        'statusrequest',
-        'is_available',
-        'idrequester',
-        'iditem'
+        'isAdmin',
+        'statusRequest',
+        'isAvailable',
+        'idRequester',
+        'idItem'
     ];
 }
