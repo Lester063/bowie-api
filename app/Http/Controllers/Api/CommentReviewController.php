@@ -52,7 +52,7 @@ class CommentReviewController extends Controller
                 ], 400);
             }
             else {
-                $commentreview = CommentReview::create([
+                $commentReview = CommentReview::create([
                     'rating' => $request->rating,
                     'comment' => $request->comment,
                     'idrequest' => $request->idrequest,
@@ -63,7 +63,7 @@ class CommentReviewController extends Controller
 
                 return response()->json([
                     'message' => 'You have reviewed on this request successfully.',
-                    'data' => $commentreview
+                    'data' => $commentReview
                 ], 200);
             }
         }

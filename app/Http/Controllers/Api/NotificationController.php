@@ -34,7 +34,7 @@ class NotificationController extends Controller
 
     }
 
-    public function createNotification($data) {
+    public function sendNotification($data) {
         $notification = Notification::create([
             'recipientUserId' => $data['recipientUserId'],
             'senderUserId' => $data['senderUserId'],
@@ -50,14 +50,21 @@ class NotificationController extends Controller
     public function generateNotificationMessage($notificationData) {
         switch($notificationData['type']) {
             case 'requesting the item' :
+            case 'returning the item' :
                 //e.g Lester is requesting the item OGE
                 $notificationMessage = $notificationData['firstName'].' is '.$notificationData['type'].' '.$notificationData['itemCode'].'.';
                 break;
             case 'approve the request' :
-                //e.g Lester approve the request of item OGE
+            case 'close the request' :
+            case 'decline the request' :
+            case 'approve the return' :
+                //e.g Lester approve the return of the requested item OGE
                 $notificationMessage = $notificationData['firstName'].' '. $notificationData['type'].' of item '.$notificationData['itemCode'].'.';
                 break;
-            //add all actions
+            case 'sent a message' :
+                //e.g Lester sent a message on the request item with Reference #1
+                $notificationMessage = $notificationData['firstName'].' '. $notificationData['type'].' on the request item with Reference #00'.$notificationData['requestID'].'.';
+                break;
             default: $notificationMessage = 'Invalid';
         }
         return $notificationMessage;
@@ -70,44 +77,35 @@ class NotificationController extends Controller
     //returning the item typeValueID = return id
     public function regenerateNotificationMessage($id) {
         $notification = Notification::find($id);
-        if($notification->type === 'approve the request' || $notification->type === 'decline the request' || $notification->type === 'close the request') {
-            $requests = Requests::find($notification->typeValueID);
-            $user = User::find($notification->senderUserId);
-            $item = Item::find($requests->iditem);
-            $notificationmessage = $user->first_name.' '. $notification->type.' of item '.$item->itemcode.'.';
+        switch($notification['type']) {
+            case 'requesting the item':
+            case 'returning the item' :
+                //e.g Lester is requesting the item OGE
+                $requests = Requests::find($notification['typeValueID']);
+                $user = User::find($notification['senderUserId']);
+                $item = Item::find($requests['iditem']);
+                $notificationMessage = $user['first_name'].' is '.$notification['type'].' '.$item['itemcode'].'.';
+                break;
+            case 'approve the request' :
+            case 'close the request' :
+            case 'decline the request' :
+            case 'approve the return' :
+                //e.g Lester approve the request of item OGE
+                $requests = Requests::find($notification['typeValueID']);
+                $user = User::find($notification['senderUserId']);
+                $item = Item::find($requests['iditem']);
+                $notificationMessage = $user['first_name'].' '. $notification['type'].' of item '.$item['itemcode'].'.';
+                break;
+            case 'sent a message' :
+                //e.g Lester sent a message on the request item with Reference #1
+                $requests = Requests::find($notification['typeValueID']);
+                $user = User::find($notification['senderUserId']);
+                $item = Item::find($requests['iditem']);
+                $notificationMessage = $user['first_name'].' '. $notification['type'].' on the request item with Reference #00'.$requests['id'].'.';
+                break;
+            default: $notificationMessage = 'Invalid';
         }
-
-        if($notification->type === 'approve the return') {
-            $return = Returns::find($notification->typeValueID);
-            $requests = Requests::find($return->idrequest);
-            $user = User::find($notification->senderUserId);
-            $item = Item::find($requests->iditem);
-            $notificationmessage = $user->first_name.' '. $notification->type.' of the requested item '.$item->itemcode.'.';
-        }
-
-        if($notification->type === 'sent a message') {
-            $requests = Requests::find($notification->typeValueID);
-            $user = User::find($notification->senderUserId);
-            $item = Item::find($requests->iditem);
-            $notificationmessage = $user->first_name.' '. $notification->type.' on the request item '.$requests->id.'.';
-        }
-
-        if($notification->type === 'requesting the item') {
-            $requests = Requests::find($notification->typeValueID);
-            $user = User::find($notification->senderUserId);
-            $item = Item::find($requests->iditem);
-            $notificationmessage = $user->first_name.' is '.$notification->type.' '.$item->itemcode.'.';
-        }
-
-        if($notification->type === 'returning the item') {
-            $return = Returns::find($notification->typeValueID);
-            $requests = Requests::find($return->idrequest);
-            $user = User::find($notification->senderUserId);
-            $item = Item::find($requests->iditem);
-            $notificationmessage = $user->first_name.' is '.$notification->type.' '.$item->itemcode.'.';
-        }
-
-        return $notificationmessage;
+        return $notificationMessage;
 
     }
 
