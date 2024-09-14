@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
+use App\Models\User;
 
 class RegisterTest extends TestCase
 {
@@ -26,7 +27,7 @@ class RegisterTest extends TestCase
         $this->assertTrue($response['data']['firstName'] == 'Test Name');
 
         //delete test data
-        $this->testDeleteUser($response['data']['id']);
+        self::testDeleteUser($response['data']['id']);
     }
 
     public function testRegisterDuplicateEmail() {
@@ -55,7 +56,7 @@ class RegisterTest extends TestCase
         $user2->assertStatus(422);
 
         //delete test data
-        $this->testDeleteUser($user1['data']['id']);
+        self::testDeleteUser($user1['data']['id']);
     }
 
     public function testRegisterInvalidEmail() {
@@ -134,10 +135,15 @@ class RegisterTest extends TestCase
             'email' => 'lester@gmail.com',
             'password' => 'lester123'
         ];
-        $this->test_login($credentials);
+        $user = User::factory()->create([
+            'isAdmin' => true,
+        ]);
+        $this->actingAs($user);
         //$login = $this->post('http://localhost:8000/api/login', $credentials);
         $delete = $this->delete('http://localhost:8000/api/user/'.$id.'/delete');
         $delete->assertStatus(200);
+
+        $user->delete();
     }
 
 }

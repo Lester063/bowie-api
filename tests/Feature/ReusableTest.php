@@ -8,7 +8,7 @@ namespace Tests\Feature;
 
 trait ReusableTest
 {
-    private function test_login($credentials) {
+    private function testLogin($credentials) {
         $login = $this->post('http://localhost:8000/api/login', $credentials);
         return $login;
     }
