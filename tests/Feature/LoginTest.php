@@ -6,6 +6,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use Illuminate\Support\Facades\Response as FacadeResponse;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 
 class LoginTest extends TestCase
 {
@@ -13,11 +15,14 @@ class LoginTest extends TestCase
 
     public function testLoginSuccessAdmin() {
         //Admin User
-        $credentials = [
-            'email' => 'lester@gmail.com',
+        $user = User::factory()->create([
+            'isAdmin' => true,
+            'password' => Hash::make('lester123'),
+        ]);
+        $login = self::testLogin([
+            'email' => $user['email'],
             'password' => 'lester123'
-        ];
-        $login = $this->test_login($credentials);
+        ]);
         $login
             ->assertStatus(200)
             ->assertJson([
@@ -26,15 +31,20 @@ class LoginTest extends TestCase
                     'isAdmin' => 1
                 ]
             ]);
+
+        $user->delete();
     }
 
     public function testLoginSuccessUser() {
         //Normal User
-        $credentials = [
-            'email' => 'jerome@gmail.com',
+        $user = User::factory()->create([
+            'isAdmin' => false,
+            'password' => Hash::make('lester123'),
+        ]);
+        $login = self::testLogin([
+            'email' => $user['email'],
             'password' => 'lester123'
-        ];
-        $login = $this->test_login($credentials);
+        ]);
         $login
             ->assertStatus(200)
             ->assertJson([
@@ -43,6 +53,8 @@ class LoginTest extends TestCase
                     'isAdmin' => 0
                 ]
             ]);
+
+        $user->delete();
     }
 
     public function testLoginInvalidEmail() {
@@ -50,7 +62,7 @@ class LoginTest extends TestCase
             'email' => 'lester.com',
             'password' => 'lester123'
         ];
-        $login = $this->test_login($credentials);
+        $login = self::testLogin($credentials);
         $login
             ->assertStatus(422)
             ->assertJson([
@@ -63,7 +75,7 @@ class LoginTest extends TestCase
             'email' => 'lester@gmail.com',
             'password' => 'lester1234'
         ];
-        $login = $this->test_login($credentials);
+        $login = self::testLogin($credentials);
         $login
             ->assertStatus(422)
             ->assertJson([
@@ -76,7 +88,7 @@ class LoginTest extends TestCase
             'email' => '',
             'password' => 'lester1234'
         ];
-        $login = $this->test_login($credentials);
+        $login = self::testLogin($credentials);
         $login
             ->assertStatus(422)
             ->assertJson([
@@ -89,7 +101,7 @@ class LoginTest extends TestCase
             'email' => 'lester@gmail.com',
             'password' => ''
         ];
-        $login = $this->test_login($credentials);
+        $login = self::testLogin($credentials);
         $login
             ->assertStatus(422)
             ->assertJson([
@@ -102,7 +114,7 @@ class LoginTest extends TestCase
             'email' => '',
             'password' => ''
         ];
-        $login = $this->test_login($credentials);
+        $login = self::testLogin($credentials);
         $login
             ->assertStatus(422)
             ->assertJson([
