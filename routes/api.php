@@ -80,9 +80,6 @@ Route::middleware('auth:sanctum', 'isAdmin')->group(function(){
     //return - admin view
     Route::get('returns', [ReturnController::class,'indexAdmin']);
 
-    //delete user, for testing purposes only
-    Route::delete('user/{id}/delete', [AuthController::class,'delete']);
-
 });
 
 

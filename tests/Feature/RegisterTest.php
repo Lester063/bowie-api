@@ -27,7 +27,10 @@ class RegisterTest extends TestCase
         $this->assertTrue($response['data']['firstName'] == 'Test Name');
 
         //delete test data
-        self::testDeleteUser($response['data']['id']);
+        $user = User::where('email', 'test@gmail.com')->first();
+        if ($user) {
+            $user->delete();
+        }
     }
 
     public function testRegisterDuplicateEmail() {
@@ -56,7 +59,10 @@ class RegisterTest extends TestCase
         $user2->assertStatus(422);
 
         //delete test data
-        self::testDeleteUser($user1['data']['id']);
+        $user = User::where('email', 'test@gmail.com')->first();
+        if ($user) {
+            $user->delete();
+        }
     }
 
     public function testRegisterInvalidEmail() {
@@ -126,24 +132,6 @@ class RegisterTest extends TestCase
                 ],
             ]
         ]);
-    }
-
-    //use to cleanup data used on testing
-    private function testDeleteUser($id) {
-        //Admin User
-        $credentials = [
-            'email' => 'lester@gmail.com',
-            'password' => 'lester123'
-        ];
-        $user = User::factory()->create([
-            'isAdmin' => true,
-        ]);
-        $this->actingAs($user);
-        //$login = $this->post('http://localhost:8000/api/login', $credentials);
-        $delete = $this->delete('http://localhost:8000/api/user/'.$id.'/delete');
-        $delete->assertStatus(200);
-
-        $user->delete();
     }
 
 }
