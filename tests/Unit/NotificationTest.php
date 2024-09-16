@@ -154,10 +154,31 @@ class NotificationTest extends TestCase
             'isRead' => true,
             'typeValueId' => '123'
         ]);
-        $notification->delete();
         $user->delete();
+        $notification->delete();
+    }
 
+    public function testRegenerateNotificationMessageIsInvalid() {
+        $notificationController = new \App\Http\Controllers\Api\NotificationController;
 
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $notification = Notification::factory()->create([
+            'recipientUserId' => $user->id,
+            'senderUserId' => '2',
+            'type' => 'ehehe',
+            'notificationMessage' => 'Lester is requesting the item OGE.',
+            'isRead' => 0,
+            'typeValueId' => '123'
+        ]);
+
+        $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
+        $this->assertTrue($regeneratedMessage == 'Invalid');
+
+        //clean up
+        $user->delete();
+        $notification->delete();
     }
 
 }
