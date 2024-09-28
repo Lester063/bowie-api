@@ -3,13 +3,15 @@
 namespace Tests\Unit;
 namespace App\Http\Controllers\api;
 use App\Models\Notification;
+use App\Models\Requests;
+use App\Models\User;
+use App\Models\Item;
 use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\DB;
-use App\Models\User;
 use Mockery;
 
 class NotificationTest extends TestCase
@@ -135,7 +137,7 @@ class NotificationTest extends TestCase
         $this->actingAs($user);
 
         $notification = Notification::factory()->create([
-            'recipientUserId' => $user->id,
+            'recipientUserId' => $user['id'],
             'senderUserId' => '2',
             'type' => 'ehehe',
             'notificationMessage' => 'Lester is requesting the item OGE.',
@@ -147,7 +149,7 @@ class NotificationTest extends TestCase
         $notificationController->readUnreadUserNotification();
 
         $this->assertDatabaseHas('notifications', [
-            'recipientUserId' => $user->id,
+            'recipientUserId' => $user['id'],
             'senderUserId' => '2',
             'type' => 'ehehe',
             'notificationMessage' => 'Lester is requesting the item OGE.',
@@ -165,7 +167,7 @@ class NotificationTest extends TestCase
         $this->actingAs($user);
 
         $notification = Notification::factory()->create([
-            'recipientUserId' => $user->id,
+            'recipientUserId' => $user['id'],
             'senderUserId' => '2',
             'type' => 'ehehe',
             'notificationMessage' => 'Lester is requesting the item OGE.',
@@ -179,6 +181,42 @@ class NotificationTest extends TestCase
         //clean up
         $user->delete();
         $notification->delete();
+    }
+
+    public function testRegenerateNotificationForRequestingTheItem() {
+        $notificationController = new \App\Http\Controllers\Api\NotificationController;
+
+        $user = User::factory()->create([
+            'firstName' => 'Lester'
+        ]);
+        $this->actingAs($user);
+        
+        $item = Item::factory()->create([
+            'itemName' => 'Monitorr',
+            'itemCode' => 'MRR1',
+        ]);
+
+        $requests = Requests::factory()->create([
+            'idRequester' => $user['id'],
+            'idItem' => $item['id'],
+        ]);
+
+        $notification = Notification::factory()->create([
+            'recipientUserId' => '2',
+            'senderUserId' => $user['id'],
+            'type' => 'requesting the item',
+            'notificationMessage' => 'Lester is requesting the item MRR1.',
+            'isRead' => 0,
+            'typeValueId' => $requests['id']
+        ]);
+
+        $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
+        $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
+
+        $user->delete();
+        $notification->delete();
+        $requests->delete();
+        $item->delete();
     }
 
 }
