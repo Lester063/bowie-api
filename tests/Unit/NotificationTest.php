@@ -6,6 +6,7 @@ use App\Models\Notification;
 use App\Models\Requests;
 use App\Models\User;
 use App\Models\Item;
+use App\Models\Returns;
 use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -170,7 +171,7 @@ class NotificationTest extends TestCase
             'recipientUserId' => $user['id'],
             'senderUserId' => '2',
             'type' => 'ehehe',
-            'notificationMessage' => 'Lester is requesting the item OGE.',
+            'notificationMessage' => 'Sample User is requesting the item OGE.',
             'isRead' => 0,
             'typeValueId' => '123'
         ]);
@@ -186,10 +187,13 @@ class NotificationTest extends TestCase
     public function testRegenerateNotificationForRequestingTheItem() {
         $notificationController = new \App\Http\Controllers\Api\NotificationController;
 
-        $user = User::factory()->create([
+        $user1 = User::factory()->create([
+            'firstName' => 'Sample User'
+        ]);
+        $user2 = User::factory()->create([
             'firstName' => 'Lester'
         ]);
-        $this->actingAs($user);
+        $this->actingAs($user2);
         
         $item = Item::factory()->create([
             'itemName' => 'Monitorr',
@@ -197,15 +201,15 @@ class NotificationTest extends TestCase
         ]);
 
         $requests = Requests::factory()->create([
-            'idRequester' => $user['id'],
+            'idRequester' => $user1['id'],
             'idItem' => $item['id'],
         ]);
 
         $notification = Notification::factory()->create([
-            'recipientUserId' => '2',
-            'senderUserId' => $user['id'],
+            'recipientUserId' => $user2['id'],
+            'senderUserId' => $user1['id'],
             'type' => 'requesting the item',
-            'notificationMessage' => 'Lester is requesting the item MRR1.',
+            'notificationMessage' => 'Sample User is requesting the item MRR1.',
             'isRead' => 0,
             'typeValueId' => $requests['id']
         ]);
@@ -213,7 +217,261 @@ class NotificationTest extends TestCase
         $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
         $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
 
-        $user->delete();
+        $user1->delete();
+        $user2->delete();
+        $notification->delete();
+        $requests->delete();
+        $item->delete();
+    }
+
+    public function testRegenerateNotificationForApproveTheRequest() {
+        $notificationController = new \App\Http\Controllers\Api\NotificationController;
+
+        $user1 = User::factory()->create([
+            'firstName' => 'Sample User'
+        ]);
+        $user2 = User::factory()->create([
+            'firstName' => 'Lester'
+        ]);
+        $this->actingAs($user1);
+        
+        $item = Item::factory()->create([
+            'itemName' => 'Monitorr',
+            'itemCode' => 'MRR1',
+        ]);
+
+        $requests = Requests::factory()->create([
+            'idRequester' => $user1['id'],
+            'idItem' => $item['id'],
+        ]);
+
+        $notification = Notification::factory()->create([
+            'recipientUserId' => $user1['id'],
+            'senderUserId' => $user2['id'],
+            'type' => 'approve the request',
+            'notificationMessage' => 'Lester approve the request of item MRR1.',
+            'isRead' => 0,
+            'typeValueId' => $requests['id']
+        ]);
+
+        $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
+        $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
+
+        $user1->delete();
+        $user2->delete();
+        $notification->delete();
+        $requests->delete();
+        $item->delete();
+    }
+
+    public function testRegenerateNotificationForCloseTheRequest() {
+        $notificationController = new \App\Http\Controllers\Api\NotificationController;
+
+        $user1 = User::factory()->create([
+            'firstName' => 'Sample User'
+        ]);
+        $user2 = User::factory()->create([
+            'firstName' => 'Lester'
+        ]);
+        $this->actingAs($user1);
+        
+        $item = Item::factory()->create([
+            'itemName' => 'Monitorr',
+            'itemCode' => 'MRR1',
+        ]);
+
+        $requests = Requests::factory()->create([
+            'idRequester' => $user1['id'],
+            'idItem' => $item['id'],
+        ]);
+
+        $notification = Notification::factory()->create([
+            'recipientUserId' => $user1['id'],
+            'senderUserId' => $user2['id'],
+            'type' => 'close the request',
+            'notificationMessage' => 'Lester close the request of item MRR1.',
+            'isRead' => 0,
+            'typeValueId' => $requests['id']
+        ]);
+
+        $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
+        $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
+
+        $user1->delete();
+        $user2->delete();
+        $notification->delete();
+        $requests->delete();
+        $item->delete();
+    }
+
+    public function testRegenerateNotificationForDeclineTheRequest() {
+        $notificationController = new \App\Http\Controllers\Api\NotificationController;
+
+        $user1 = User::factory()->create([
+            'firstName' => 'Sample User'
+        ]);
+        $user2 = User::factory()->create([
+            'firstName' => 'Lester'
+        ]);
+        $this->actingAs($user1);
+        
+        $item = Item::factory()->create([
+            'itemName' => 'Monitorr',
+            'itemCode' => 'MRR1',
+        ]);
+
+        $requests = Requests::factory()->create([
+            'idRequester' => $user1['id'],
+            'idItem' => $item['id'],
+        ]);
+
+        $notification = Notification::factory()->create([
+            'recipientUserId' => $user1['id'],
+            'senderUserId' => $user2['id'],
+            'type' => 'decline the request',
+            'notificationMessage' => 'Lester decline the request of item MRR1.',
+            'isRead' => 0,
+            'typeValueId' => $requests['id']
+        ]);
+
+        $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
+        $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
+
+        $user1->delete();
+        $user2->delete();
+        $notification->delete();
+        $requests->delete();
+        $item->delete();
+    }
+
+    public function testRegenerateNotificationForReturningTheItem() {
+        $notificationController = new \App\Http\Controllers\Api\NotificationController;
+
+        $user1 = User::factory()->create([
+            'firstName' => 'Sample User'
+        ]);
+        $user2 = User::factory()->create([
+            'firstName' => 'Lester'
+        ]);
+        $this->actingAs($user1);
+        
+        $item = Item::factory()->create([
+            'itemName' => 'Monitorr',
+            'itemCode' => 'MRR1',
+        ]);
+
+        $requests = Requests::factory()->create([
+            'idRequester' => $user1['id'],
+            'idItem' => $item['id'],
+        ]);
+
+        $returns = Returns::factory()->create([
+            'idRequest' => $requests['id'],
+            'idReturner' => $requests['idRequester']
+        ]);
+
+        $notification = Notification::factory()->create([
+            'recipientUserId' => $user2['id'],
+            'senderUserId' => $user1['id'],
+            'type' => 'returning the item',
+            'notificationMessage' => 'Sample User is returning the item MRR1.',
+            'isRead' => 0,
+            'typeValueId' => $returns['id']
+        ]);
+
+        $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
+        $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
+
+        $user1->delete();
+        $user2->delete();
+        $notification->delete();
+        $requests->delete();
+        $item->delete();
+        $returns->delete();
+    }
+
+    public function testRegenerateNotificationForApproveTheReturn() {
+        $notificationController = new \App\Http\Controllers\Api\NotificationController;
+
+        $user1 = User::factory()->create([
+            'firstName' => 'Sample User'
+        ]);
+        $user2 = User::factory()->create([
+            'firstName' => 'Lester'
+        ]);
+        $this->actingAs($user1);
+        
+        $item = Item::factory()->create([
+            'itemName' => 'Monitorr',
+            'itemCode' => 'MRR1',
+        ]);
+
+        $requests = Requests::factory()->create([
+            'idRequester' => $user1['id'],
+            'idItem' => $item['id'],
+        ]);
+
+        $returns = Returns::factory()->create([
+            'idRequest' => $requests['id'],
+            'idReturner' => $requests['idRequester'],
+            'isApprove' => true
+        ]);
+
+        $notification = Notification::factory()->create([
+            'recipientUserId' => $user1['id'],
+            'senderUserId' => $user2['id'],
+            'type' => 'approve the return',
+            'notificationMessage' => 'Lester approve the return MRR1.',
+            'isRead' => 0,
+            'typeValueId' => $returns['id']
+        ]);
+
+        $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
+        $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
+
+        $user1->delete();
+        $user2->delete();
+        $notification->delete();
+        $requests->delete();
+        $item->delete();
+        $returns->delete();
+    }
+
+    public function testRegenerateNotificationForSentMessage() {
+        $notificationController = new \App\Http\Controllers\Api\NotificationController;
+
+        $user1 = User::factory()->create([
+            'firstName' => 'Sample User'
+        ]);
+        $user2 = User::factory()->create([
+            'firstName' => 'Lester'
+        ]);
+        $this->actingAs($user1);
+        
+        $item = Item::factory()->create([
+            'itemName' => 'Monitorr',
+            'itemCode' => 'MRR1',
+        ]);
+
+        $requests = Requests::factory()->create([
+            'idRequester' => $user1['id'],
+            'idItem' => $item['id'],
+        ]);
+
+        $notification = Notification::factory()->create([
+            'recipientUserId' => $user2['id'],
+            'senderUserId' => $user1['id'],
+            'type' => 'sent a message',
+            'notificationMessage' => 'Sample User sent a message on the request item with Reference #00'.$requests['id'].'.',
+            'isRead' => 0,
+            'typeValueId' => $requests['id']
+        ]);
+
+        $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
+        $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
+
+        $user1->delete();
+        $user2->delete();
         $notification->delete();
         $requests->delete();
         $item->delete();
