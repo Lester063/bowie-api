@@ -3,13 +3,13 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 use App\Models\User;
 
 class RegisterTest extends TestCase
 {
     use ReusableTest;
+    use RefreshDatabase;
     
     public function testRegisterSuccessUserAccount() {
         $data = [
@@ -26,11 +26,6 @@ class RegisterTest extends TestCase
         $response->assertStatus(200);
         $this->assertTrue($response['data']['firstName'] == 'Test Name');
 
-        //delete test data
-        $user = User::where('email', 'test@gmail.com')->first();
-        if ($user) {
-            $user->delete();
-        }
     }
 
     public function testRegisterDuplicateEmail() {
@@ -58,11 +53,6 @@ class RegisterTest extends TestCase
         $user2 = $this->post('http://localhost:8000/api/register', $data2);
         $user2->assertStatus(422);
 
-        //delete test data
-        $user = User::where('email', 'test@gmail.com')->first();
-        if ($user) {
-            $user->delete();
-        }
     }
 
     public function testRegisterInvalidEmail() {

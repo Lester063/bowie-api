@@ -1,23 +1,17 @@
 <?php
 
 namespace Tests\Unit;
-namespace App\Http\Controllers\api;
 use App\Models\Notification;
 use App\Models\Requests;
 use App\Models\User;
 use App\Models\Item;
 use App\Models\Returns;
-use Illuminate\Support\Facades\Auth;
 use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\DB;
-use Mockery;
 
 class NotificationTest extends TestCase
 {
-    //use RefreshDatabase;
+    use RefreshDatabase;
 
     public function testSendNotification() {
         $notificationController = new \App\Http\Controllers\Api\NotificationController;
@@ -41,7 +35,6 @@ class NotificationTest extends TestCase
             'typeValueId' => $data['typeValueId'],
         ]);
 
-        $notification->delete();
     }
 
     public function testGenerateMessageIsInvalid() {
@@ -157,8 +150,7 @@ class NotificationTest extends TestCase
             'isRead' => true,
             'typeValueId' => '123'
         ]);
-        $user->delete();
-        $notification->delete();
+
     }
 
     public function testRegenerateNotificationMessageIsInvalid() {
@@ -179,9 +171,6 @@ class NotificationTest extends TestCase
         $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
         $this->assertTrue($regeneratedMessage == 'Invalid');
 
-        //clean up
-        $user->delete();
-        $notification->delete();
     }
 
     public function testRegenerateNotificationForRequestingTheItem() {
@@ -217,11 +206,6 @@ class NotificationTest extends TestCase
         $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
         $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
 
-        $user1->delete();
-        $user2->delete();
-        $notification->delete();
-        $requests->delete();
-        $item->delete();
     }
 
     public function testRegenerateNotificationForApproveTheRequest() {
@@ -257,11 +241,6 @@ class NotificationTest extends TestCase
         $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
         $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
 
-        $user1->delete();
-        $user2->delete();
-        $notification->delete();
-        $requests->delete();
-        $item->delete();
     }
 
     public function testRegenerateNotificationForCloseTheRequest() {
@@ -297,11 +276,6 @@ class NotificationTest extends TestCase
         $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
         $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
 
-        $user1->delete();
-        $user2->delete();
-        $notification->delete();
-        $requests->delete();
-        $item->delete();
     }
 
     public function testRegenerateNotificationForDeclineTheRequest() {
@@ -337,11 +311,6 @@ class NotificationTest extends TestCase
         $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
         $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
 
-        $user1->delete();
-        $user2->delete();
-        $notification->delete();
-        $requests->delete();
-        $item->delete();
     }
 
     public function testRegenerateNotificationForReturningTheItem() {
@@ -382,12 +351,6 @@ class NotificationTest extends TestCase
         $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
         $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
 
-        $user1->delete();
-        $user2->delete();
-        $notification->delete();
-        $requests->delete();
-        $item->delete();
-        $returns->delete();
     }
 
     public function testRegenerateNotificationForApproveTheReturn() {
@@ -429,12 +392,6 @@ class NotificationTest extends TestCase
         $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
         $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
 
-        $user1->delete();
-        $user2->delete();
-        $notification->delete();
-        $requests->delete();
-        $item->delete();
-        $returns->delete();
     }
 
     public function testRegenerateNotificationForSentMessage() {
@@ -470,11 +427,6 @@ class NotificationTest extends TestCase
         $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
         $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
 
-        $user1->delete();
-        $user2->delete();
-        $notification->delete();
-        $requests->delete();
-        $item->delete();
     }
 
 }

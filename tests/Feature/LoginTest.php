@@ -3,15 +3,14 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
-use Illuminate\Support\Facades\Response as FacadeResponse;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
 class LoginTest extends TestCase
 {
     use ReusableTest;
+    use RefreshDatabase;
 
     public function testLoginSuccessAdmin() {
         //Admin User
@@ -31,8 +30,6 @@ class LoginTest extends TestCase
                     'isAdmin' => 1
                 ]
             ]);
-
-        $user->delete();
     }
 
     public function testLoginSuccessUser() {
@@ -54,7 +51,6 @@ class LoginTest extends TestCase
                 ]
             ]);
 
-        $user->delete();
     }
 
     public function testLoginInvalidEmail() {
