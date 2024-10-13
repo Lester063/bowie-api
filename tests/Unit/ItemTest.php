@@ -3,13 +3,12 @@
 namespace Tests\Unit;
 use App\Models\User;
 use App\Models\Item;
-use Illuminate\Support\Collection;
 use Tests\TestCase;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 class ItemTest extends TestCase
 {
-
+    use RefreshDatabase;
     /**
      * A basic unit test example.
      */
@@ -25,15 +24,11 @@ class ItemTest extends TestCase
             'itemName' => 'Sample Item',
             'itemCode' => 'AAA1',
         ]);
-        $createItem = $itemController->store($request);
+        $itemController->store($request);
         $this->assertDatabaseHas('items',[
             'itemName' => 'Sample Item',
             'itemCode' => 'AAA1'
         ]);
-        $itemData = $createItem->getData();
-        $item = Item::find($itemData->data->id);
-        $item->delete();
-        $user->delete();
 
     }
 }
