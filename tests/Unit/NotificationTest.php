@@ -7,15 +7,22 @@ use App\Models\User;
 use App\Models\Item;
 use App\Models\Returns;
 use Tests\TestCase;
+use App\Http\Controllers\Api\NotificationController;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class NotificationTest extends TestCase
 {
     use RefreshDatabase;
+    protected $notificationController;
+
+    protected function setUp(): void {
+        parent::setUp();
+
+        $this->notificationController = new NotificationController;
+    }
 
     public function testSendNotification() {
-        $notificationController = new \App\Http\Controllers\Api\NotificationController;
-        $notification = $notificationController->sendNotification($data = [
+        $notification = $this->notificationController->sendNotification($data = [
             'recipientUserId' => '1',
             'senderUserId' => '2',
             'type' => 'ehehe',
@@ -38,8 +45,7 @@ class NotificationTest extends TestCase
     }
 
     public function testGenerateMessageIsInvalid() {
-        $notificationController = new \App\Http\Controllers\Api\NotificationController;
-        $notificationMessage = $notificationController->generateNotificationMessage([
+        $notificationMessage = $this->notificationController->generateNotificationMessage([
             'firstName' => 'Lester',
             'type' => 'invalid message',
             'requestID' => '1'
@@ -48,8 +54,7 @@ class NotificationTest extends TestCase
     }
 
     public function testGenerateMessageForRequestingTheItem() {
-        $notificationController = new \App\Http\Controllers\Api\NotificationController;
-        $notificationMessage = $notificationController->generateNotificationMessage([
+        $notificationMessage = $this->notificationController->generateNotificationMessage([
             'firstName' => 'Lester',
             'type' => 'requesting the item',
             'itemCode' => 'OGE'
@@ -59,8 +64,7 @@ class NotificationTest extends TestCase
     }
 
     public function testGenerateMessageForReturningTheItem() {
-        $notificationController = new \App\Http\Controllers\Api\NotificationController;
-        $notificationMessage = $notificationController->generateNotificationMessage([
+        $notificationMessage = $this->notificationController->generateNotificationMessage([
             'firstName' => 'Lester',
             'type' => 'returning the item',
             'itemCode' => 'OGE'
@@ -70,8 +74,7 @@ class NotificationTest extends TestCase
     }
 
     public function testGenerateMessageForApproveTheRequest() {
-        $notificationController = new \App\Http\Controllers\Api\NotificationController;
-        $notificationMessage = $notificationController->generateNotificationMessage([
+        $notificationMessage = $this->notificationController->generateNotificationMessage([
             'firstName' => 'Lester',
             'type' => 'approve the request',
             'itemCode' => 'OGE'
@@ -81,8 +84,7 @@ class NotificationTest extends TestCase
     }
 
     public function testGenerateMessageForCloseTheRequest() {
-        $notificationController = new \App\Http\Controllers\Api\NotificationController;
-        $notificationMessage = $notificationController->generateNotificationMessage([
+        $notificationMessage = $this->notificationController->generateNotificationMessage([
             'firstName' => 'Lester',
             'type' => 'close the request',
             'itemCode' => 'OGE'
@@ -92,8 +94,7 @@ class NotificationTest extends TestCase
     }
 
     public function testGenerateMessageForDeclineTheRequest() {
-        $notificationController = new \App\Http\Controllers\Api\NotificationController;
-        $notificationMessage = $notificationController->generateNotificationMessage([
+        $notificationMessage = $this->notificationController->generateNotificationMessage([
             'firstName' => 'Lester',
             'type' => 'decline the request',
             'itemCode' => 'OGE'
@@ -103,8 +104,7 @@ class NotificationTest extends TestCase
     }
 
     public function testGenerateMessageForApproveTheReturn() {
-        $notificationController = new \App\Http\Controllers\Api\NotificationController;
-        $notificationMessage = $notificationController->generateNotificationMessage([
+        $notificationMessage = $this->notificationController->generateNotificationMessage([
             'firstName' => 'Lester',
             'type' => 'approve the return',
             'itemCode' => 'OGE'
@@ -114,8 +114,7 @@ class NotificationTest extends TestCase
     }
 
     public function testGenerateMessageForSentMessage() {
-        $notificationController = new \App\Http\Controllers\Api\NotificationController;
-        $notificationMessage = $notificationController->generateNotificationMessage([
+        $notificationMessage = $this->notificationController->generateNotificationMessage([
             'firstName' => 'Lester',
             'type' => 'sent a message',
             'requestID' => '1'
@@ -125,8 +124,6 @@ class NotificationTest extends TestCase
     }
 
     public function testReadUnreadUserNotification() {
-        $notificationController = new \App\Http\Controllers\Api\NotificationController;
-
         $user = User::factory()->create();
         $this->actingAs($user);
 
@@ -140,7 +137,7 @@ class NotificationTest extends TestCase
         ]);
         $this->assertTrue($notification['isRead'] == false);
 
-        $notificationController->readUnreadUserNotification();
+        $this->notificationController->readUnreadUserNotification();
 
         $this->assertDatabaseHas('notifications', [
             'recipientUserId' => $user['id'],
@@ -154,8 +151,6 @@ class NotificationTest extends TestCase
     }
 
     public function testRegenerateNotificationMessageIsInvalid() {
-        $notificationController = new \App\Http\Controllers\Api\NotificationController;
-
         $user = User::factory()->create();
         $this->actingAs($user);
 
@@ -168,14 +163,12 @@ class NotificationTest extends TestCase
             'typeValueId' => '123'
         ]);
 
-        $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
+        $regeneratedMessage = $this->notificationController->regenerateNotificationMessage($notification['id']);
         $this->assertTrue($regeneratedMessage == 'Invalid');
 
     }
 
     public function testRegenerateNotificationForRequestingTheItem() {
-        $notificationController = new \App\Http\Controllers\Api\NotificationController;
-
         $user1 = User::factory()->create([
             'firstName' => 'Sample User'
         ]);
@@ -203,14 +196,12 @@ class NotificationTest extends TestCase
             'typeValueId' => $requests['id']
         ]);
 
-        $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
+        $regeneratedMessage = $this->notificationController->regenerateNotificationMessage($notification['id']);
         $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
 
     }
 
     public function testRegenerateNotificationForApproveTheRequest() {
-        $notificationController = new \App\Http\Controllers\Api\NotificationController;
-
         $user1 = User::factory()->create([
             'firstName' => 'Sample User'
         ]);
@@ -238,14 +229,12 @@ class NotificationTest extends TestCase
             'typeValueId' => $requests['id']
         ]);
 
-        $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
+        $regeneratedMessage = $this->notificationController->regenerateNotificationMessage($notification['id']);
         $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
 
     }
 
     public function testRegenerateNotificationForCloseTheRequest() {
-        $notificationController = new \App\Http\Controllers\Api\NotificationController;
-
         $user1 = User::factory()->create([
             'firstName' => 'Sample User'
         ]);
@@ -273,14 +262,12 @@ class NotificationTest extends TestCase
             'typeValueId' => $requests['id']
         ]);
 
-        $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
+        $regeneratedMessage = $this->notificationController->regenerateNotificationMessage($notification['id']);
         $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
 
     }
 
     public function testRegenerateNotificationForDeclineTheRequest() {
-        $notificationController = new \App\Http\Controllers\Api\NotificationController;
-
         $user1 = User::factory()->create([
             'firstName' => 'Sample User'
         ]);
@@ -308,14 +295,12 @@ class NotificationTest extends TestCase
             'typeValueId' => $requests['id']
         ]);
 
-        $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
+        $regeneratedMessage = $this->notificationController->regenerateNotificationMessage($notification['id']);
         $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
 
     }
 
     public function testRegenerateNotificationForReturningTheItem() {
-        $notificationController = new \App\Http\Controllers\Api\NotificationController;
-
         $user1 = User::factory()->create([
             'firstName' => 'Sample User'
         ]);
@@ -348,14 +333,12 @@ class NotificationTest extends TestCase
             'typeValueId' => $returns['id']
         ]);
 
-        $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
+        $regeneratedMessage = $this->notificationController->regenerateNotificationMessage($notification['id']);
         $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
 
     }
 
     public function testRegenerateNotificationForApproveTheReturn() {
-        $notificationController = new \App\Http\Controllers\Api\NotificationController;
-
         $user1 = User::factory()->create([
             'firstName' => 'Sample User'
         ]);
@@ -389,14 +372,12 @@ class NotificationTest extends TestCase
             'typeValueId' => $returns['id']
         ]);
 
-        $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
+        $regeneratedMessage = $this->notificationController->regenerateNotificationMessage($notification['id']);
         $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
 
     }
 
     public function testRegenerateNotificationForSentMessage() {
-        $notificationController = new \App\Http\Controllers\Api\NotificationController;
-
         $user1 = User::factory()->create([
             'firstName' => 'Sample User'
         ]);
@@ -424,7 +405,7 @@ class NotificationTest extends TestCase
             'typeValueId' => $requests['id']
         ]);
 
-        $regeneratedMessage = $notificationController->regenerateNotificationMessage($notification['id']);
+        $regeneratedMessage = $this->notificationController->regenerateNotificationMessage($notification['id']);
         $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
 
     }
