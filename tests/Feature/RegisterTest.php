@@ -24,7 +24,7 @@ class RegisterTest extends TestCase
         $response = $this->post('http://localhost:8000/api/register', $data);
         //assert
         $response->assertStatus(200);
-        $this->assertTrue($response['data']['firstName'] == 'Test Name');
+        $this->assertTrue($response['data']['firstName'] === 'Test Name');
 
     }
 

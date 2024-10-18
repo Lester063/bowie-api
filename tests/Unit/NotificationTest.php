@@ -21,7 +21,8 @@ class NotificationTest extends TestCase
         $this->notificationController = new NotificationController;
     }
 
-    public function testSendNotification() {
+    public function testSendNotification(): void
+    {
         $notification = $this->notificationController->sendNotification($data = [
             'recipientUserId' => '1',
             'senderUserId' => '2',
@@ -44,66 +45,73 @@ class NotificationTest extends TestCase
 
     }
 
-    public function testGenerateMessageIsInvalid() {
+    public function testGenerateMessageIsInvalid(): void
+    {
         $notificationMessage = $this->notificationController->generateNotificationMessage([
             'firstName' => 'Lester',
             'type' => 'invalid message',
             'requestID' => '1'
         ]);
-        $this->assertTrue($notificationMessage == 'Invalid');
+        $this->assertTrue($notificationMessage === 'Invalid');
     }
 
-    public function testGenerateMessageForRequestingTheItem() {
+    public function testGenerateMessageForRequestingTheItem(): void
+    {
         $notificationMessage = $this->notificationController->generateNotificationMessage([
             'firstName' => 'Lester',
             'type' => 'requesting the item',
             'itemCode' => 'OGE'
         ]);
 
-        $this->assertTrue($notificationMessage == 'Lester is requesting the item OGE.');
+        $this->assertTrue($notificationMessage === 'Lester is requesting the item OGE.');
     }
 
-    public function testGenerateMessageForReturningTheItem() {
+    public function testGenerateMessageForReturningTheItem(): void
+    {
         $notificationMessage = $this->notificationController->generateNotificationMessage([
             'firstName' => 'Lester',
             'type' => 'returning the item',
             'itemCode' => 'OGE'
         ]);
 
-        $this->assertTrue($notificationMessage == 'Lester is returning the item OGE.');
+        $this->assertTrue($notificationMessage === 'Lester is returning the item OGE.');
     }
 
-    public function testGenerateMessageForApproveTheRequest() {
+    public function testGenerateMessageForApproveTheRequest(): void
+    {
         $notificationMessage = $this->notificationController->generateNotificationMessage([
             'firstName' => 'Lester',
             'type' => 'approve the request',
             'itemCode' => 'OGE'
         ]);
 
-        $this->assertTrue($notificationMessage == 'Lester approve the request of item OGE.');
+        $this->assertTrue($notificationMessage === 'Lester approve the request of item OGE.');
     }
 
-    public function testGenerateMessageForCloseTheRequest() {
+    public function testGenerateMessageForCloseTheRequest(): void
+    {
         $notificationMessage = $this->notificationController->generateNotificationMessage([
             'firstName' => 'Lester',
             'type' => 'close the request',
             'itemCode' => 'OGE'
         ]);
 
-        $this->assertTrue($notificationMessage == 'Lester close the request of item OGE.');
+        $this->assertTrue($notificationMessage === 'Lester close the request of item OGE.');
     }
 
-    public function testGenerateMessageForDeclineTheRequest() {
+    public function testGenerateMessageForDeclineTheRequest(): void
+    {
         $notificationMessage = $this->notificationController->generateNotificationMessage([
             'firstName' => 'Lester',
             'type' => 'decline the request',
             'itemCode' => 'OGE'
         ]);
 
-        $this->assertTrue($notificationMessage == 'Lester decline the request of item OGE.');
+        $this->assertTrue($notificationMessage === 'Lester decline the request of item OGE.');
     }
 
-    public function testGenerateMessageForApproveTheReturn() {
+    public function testGenerateMessageForApproveTheReturn(): void
+    {
         $notificationMessage = $this->notificationController->generateNotificationMessage([
             'firstName' => 'Lester',
             'type' => 'approve the return',
@@ -113,17 +121,19 @@ class NotificationTest extends TestCase
         $this->assertTrue($notificationMessage == 'Lester approve the return of item OGE.');
     }
 
-    public function testGenerateMessageForSentMessage() {
+    public function testGenerateMessageForSentMessage(): void
+    {
         $notificationMessage = $this->notificationController->generateNotificationMessage([
             'firstName' => 'Lester',
             'type' => 'sent a message',
             'requestID' => '1'
         ]);
 
-        $this->assertTrue($notificationMessage == 'Lester sent a message on the request item with Reference #001.');
+        $this->assertTrue($notificationMessage === 'Lester sent a message on the request item with Reference #001.');
     }
 
-    public function testReadUnreadUserNotification() {
+    public function testReadUnreadUserNotification(): void
+    {
         $user = User::factory()->create();
         $this->actingAs($user);
 
@@ -135,7 +145,7 @@ class NotificationTest extends TestCase
             'isRead' => 0,
             'typeValueId' => '123'
         ]);
-        $this->assertTrue($notification['isRead'] == false);
+        $this->assertTrue($notification['isRead'] === 0);
 
         $this->notificationController->readUnreadUserNotification();
 
@@ -150,7 +160,8 @@ class NotificationTest extends TestCase
 
     }
 
-    public function testRegenerateNotificationMessageIsInvalid() {
+    public function testRegenerateNotificationMessageIsInvalid(): void
+    {
         $user = User::factory()->create();
         $this->actingAs($user);
 
@@ -164,11 +175,12 @@ class NotificationTest extends TestCase
         ]);
 
         $regeneratedMessage = $this->notificationController->regenerateNotificationMessage($notification['id']);
-        $this->assertTrue($regeneratedMessage == 'Invalid');
+        $this->assertTrue($regeneratedMessage === 'Invalid');
 
     }
 
-    public function testRegenerateNotificationForRequestingTheItem() {
+    public function testRegenerateNotificationForRequestingTheItem(): void
+    {
         $user1 = User::factory()->create([
             'firstName' => 'Sample User'
         ]);
@@ -197,11 +209,12 @@ class NotificationTest extends TestCase
         ]);
 
         $regeneratedMessage = $this->notificationController->regenerateNotificationMessage($notification['id']);
-        $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
+        $this->assertTrue($regeneratedMessage === $notification['notificationMessage']);
 
     }
 
-    public function testRegenerateNotificationForApproveTheRequest() {
+    public function testRegenerateNotificationForApproveTheRequest(): void
+    {
         $user1 = User::factory()->create([
             'firstName' => 'Sample User'
         ]);
@@ -230,11 +243,12 @@ class NotificationTest extends TestCase
         ]);
 
         $regeneratedMessage = $this->notificationController->regenerateNotificationMessage($notification['id']);
-        $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
+        $this->assertTrue($regeneratedMessage === $notification['notificationMessage']);
 
     }
 
-    public function testRegenerateNotificationForCloseTheRequest() {
+    public function testRegenerateNotificationForCloseTheRequest(): void
+    {
         $user1 = User::factory()->create([
             'firstName' => 'Sample User'
         ]);
@@ -263,11 +277,12 @@ class NotificationTest extends TestCase
         ]);
 
         $regeneratedMessage = $this->notificationController->regenerateNotificationMessage($notification['id']);
-        $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
+        $this->assertTrue($regeneratedMessage === $notification['notificationMessage']);
 
     }
 
-    public function testRegenerateNotificationForDeclineTheRequest() {
+    public function testRegenerateNotificationForDeclineTheRequest(): void
+    {
         $user1 = User::factory()->create([
             'firstName' => 'Sample User'
         ]);
@@ -296,11 +311,12 @@ class NotificationTest extends TestCase
         ]);
 
         $regeneratedMessage = $this->notificationController->regenerateNotificationMessage($notification['id']);
-        $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
+        $this->assertTrue($regeneratedMessage === $notification['notificationMessage']);
 
     }
 
-    public function testRegenerateNotificationForReturningTheItem() {
+    public function testRegenerateNotificationForReturningTheItem(): void
+    {
         $user1 = User::factory()->create([
             'firstName' => 'Sample User'
         ]);
@@ -334,11 +350,12 @@ class NotificationTest extends TestCase
         ]);
 
         $regeneratedMessage = $this->notificationController->regenerateNotificationMessage($notification['id']);
-        $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
+        $this->assertTrue($regeneratedMessage === $notification['notificationMessage']);
 
     }
 
-    public function testRegenerateNotificationForApproveTheReturn() {
+    public function testRegenerateNotificationForApproveTheReturn(): void
+    {
         $user1 = User::factory()->create([
             'firstName' => 'Sample User'
         ]);
@@ -373,11 +390,12 @@ class NotificationTest extends TestCase
         ]);
 
         $regeneratedMessage = $this->notificationController->regenerateNotificationMessage($notification['id']);
-        $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
+        $this->assertTrue($regeneratedMessage === $notification['notificationMessage']);
 
     }
 
-    public function testRegenerateNotificationForSentMessage() {
+    public function testRegenerateNotificationForSentMessage(): void
+    {
         $user1 = User::factory()->create([
             'firstName' => 'Sample User'
         ]);
@@ -406,7 +424,7 @@ class NotificationTest extends TestCase
         ]);
 
         $regeneratedMessage = $this->notificationController->regenerateNotificationMessage($notification['id']);
-        $this->assertTrue($regeneratedMessage == $notification['notificationMessage']);
+        $this->assertTrue($regeneratedMessage === $notification['notificationMessage']);
 
     }
 
