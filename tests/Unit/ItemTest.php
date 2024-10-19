@@ -109,7 +109,6 @@ class ItemTest extends TestCase
 
     }
 
-    //----
     public function testCreateItemMissingItemNameField(): void
     {
         $user = User::factory()->create([
@@ -169,13 +168,33 @@ class ItemTest extends TestCase
         ]);
     }
 
+    public function testShowEditDataSuccess(): void
+    {
+        $item = Item::factory()->create();
+        $response = $this->itemController->edit($item->id);
+
+        $responseData = $response->getData();
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertTrue($item->id === $responseData->data->id);
+        $this->assertTrue($item->itemName === $responseData->data->itemName);
+        $this->assertTrue($item->itemCode === $responseData->data->itemCode);
+    }
+
+    public function testShowEditDataIdCouldNotFind(): void
+    {
+        $response = $this->itemController->edit(12321312);
+        
+        $responseData = $response->getData();
+        $this->assertEquals(404, $response->getStatusCode());
+        $this->assertTrue($responseData->message === 'Unable to find the item.');
+    }
+
     public function testUpdateItemSuccessfully(): void
     {
         $item = Item::factory()->create([
             'itemName' => 'Keyboard',
             'itemCode' => 'K1'
         ]);
-        //dd($item->id);
         $request = Request::create("/api/items/{$item->id}/edit", 'PUT', [
             'itemName' => 'New Item Name',
             'itemCode' => 'New K1'
@@ -194,7 +213,6 @@ class ItemTest extends TestCase
             'itemName' => 'Keyboard',
             'itemCode' => 'K1'
         ]);
-        //dd($item->id);
         $request = Request::create("/api/items/{$item->id}/edit", 'PUT', [
             'itemName' => '',
             'itemCode' => 'New K1'
@@ -215,7 +233,6 @@ class ItemTest extends TestCase
             'itemName' => 'Keyboard',
             'itemCode' => 'K1'
         ]);
-        //dd($item->id);
         $request = Request::create("/api/items/{$item->id}/edit", 'PUT', [
             'itemName' => 'New Keyboard',
             'itemCode' => ''
@@ -236,7 +253,6 @@ class ItemTest extends TestCase
             'itemName' => 'Keyboard',
             'itemCode' => 'K1'
         ]);
-        //dd($item->id);
         $request = Request::create("/api/items/{$item->id}/edit", 'PUT', [
             'itemName' => '',
             'itemCode' => ''
@@ -258,7 +274,6 @@ class ItemTest extends TestCase
             'itemName' => 'Keyboard',
             'itemCode' => 'K1'
         ]);
-        //dd($item->id);
         $request = Request::create("/api/items/{$item->id}/edit", 'PUT', [
             'itemName' => 'New Keyboard',
             'itemCode' => 'New K1'
@@ -283,8 +298,6 @@ class ItemTest extends TestCase
             'itemName' => 'Keyboard',
             'itemCode' => 'K2'
         ]);
-
-        //dd($item->id);
         $request = Request::create("/api/items/{$item1->id}/edit", 'PUT', [
             'itemName' => 'New Keyboard',
             'itemCode' => $item2->itemCode
@@ -297,6 +310,71 @@ class ItemTest extends TestCase
             'itemName' => 'Keyboard',
             'itemCode' => $item2->itemCode
         ]);
+    }
+
+    public function testDeleteItemSuccess(): void
+    {
+        $item = Item::factory()->create();
+        $response = $this->itemController->delete($item->id);
+        
+        $responseData = $response->getData();
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertTrue($responseData->message === 'Item has been deleted successfully.');
+        $this->assertDatabaseMissing('items', [
+            'id' => $item->id,
+            'itemName' => $item->itemName,
+            'itemCode' => $item->itemCode,
+            'isDeleted' => false
+        ]);
+    }
+
+    public function testDeleteItemUnableToFindId(): void
+    {
+        $response = $this->itemController->delete(123123);
+        
+        $responseData = $response->getData();
+        $this->assertEquals(404, $response->getStatusCode());
+        $this->assertTrue($responseData->message === 'Unable to find the item.');
+    }
+
+    public function testVerifyCodeIsExistingWhenCreating(): void
+    {
+        $item = Item::factory()->create([
+            'itemCode' => 'SC1'
+        ]);
+
+        $response = $this->itemController->verifyCodeIfExisting('SC1', null);
+        $this->assertEquals(true, $response);
+    }
+
+    public function testVerifyCodeIsNotExistingWhenCreating(): void
+    {
+        $response = $this->itemController->verifyCodeIfExisting('SC1', null);
+        $this->assertEquals(false, $response);
+    }
+
+    //The test is trying to update the itemCode of $item2 to SC1
+    public function testVerifyCodeIsExistingWhenUpdating(): void
+    {
+        $item1 = Item::factory()->create([
+            'itemCode' => 'SC1'
+        ]);
+
+        $item2 = Item::factory()->create([
+            'itemCode' => 'SC2'
+        ]);
+        $response = $this->itemController->verifyCodeIfExisting('SC1', $item2->id);
+        $this->assertEquals(true, $response);
+    }
+
+    public function testVerifyCodeIsNotExistingWhenUpdating(): void
+    {
+        $item = Item::factory()->create([
+            'itemCode' => 'SC1'
+        ]);
+
+        $response = $this->itemController->verifyCodeIfExisting('SC2', $item->id);
+        $this->assertEquals(false, $response);
     }
     
 }
