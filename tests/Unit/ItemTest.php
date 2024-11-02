@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 use App\Models\User;
 use App\Models\Item;
+use App\Models\Requests;
 use Tests\TestCase;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -375,6 +376,100 @@ class ItemTest extends TestCase
 
         $response = $this->itemController->verifyCodeIfExisting('SC2', $item->id);
         $this->assertEquals(false, $response);
+    }
+
+    public function testCountAllRequestOnItem() : void
+    {
+        $item = Item::factory()->create([
+            'itemCode' => 'SC1'
+        ]);
+
+        $requestItem1 = Requests::factory()->create([
+            'idItem' => $item->id
+        ]);
+        $requestItem2 = Requests::factory()->create([
+            'idItem' => $item->id
+        ]);
+        //not counted
+        $requestItem3 = Requests::factory()->create([
+            'idItem' => '3'
+        ]);
+        
+        $response = $this->itemController->getItemRequestFromUser($item->id);
+        $this->assertEquals(2, $response->getData()->count);
+    }
+
+    public function testCountAllPendingRequestOnItem() : void
+    {
+        $item = Item::factory()->create([
+            'itemCode' => 'SC1'
+        ]);
+
+        $requestItem1 = Requests::factory()->create([
+            'idItem' => $item->id,
+            'statusRequest' => 'Pending'
+        ]);
+        $requestItem2 = Requests::factory()->create([
+            'idItem' => $item->id,
+            'statusRequest' => 'Approved'
+        ]);
+        //not counted
+        $requestItem3 = Requests::factory()->create([
+            'idItem' => '3',
+            'statusRequest' => 'Approved'
+        ]);
+        
+        $response = $this->itemController->getItemRequestFromUser($item->id);
+        $this->assertEquals(1, $response->getData()->countpending);
+    }
+
+    public function testGetItemRequestFromUserMissingId() : void
+    {
+        $item = Item::factory()->create([
+            'itemCode' => 'SC1'
+        ]);
+
+        $requestItem1 = Requests::factory()->create([
+            'idItem' => $item->id,
+            'statusRequest' => 'Pending'
+        ]);
+        $requestItem2 = Requests::factory()->create([
+            'idItem' => $item->id,
+            'statusRequest' => 'Approved'
+        ]);
+        //not counted
+        $requestItem3 = Requests::factory()->create([
+            'idItem' => '3',
+            'statusRequest' => 'Approved'
+        ]);
+        
+        $response = $this->itemController->getItemRequestFromUser(1);
+        $this->assertTrue($response->getData()->message === 'Unable to find the item.');
+    }
+
+    public function testGetAllItemRequestFromUser() : void
+    {
+        $item = Item::factory()->create([
+            'itemCode' => 'SC1'
+        ]);
+
+        $requestItem1 = Requests::factory()->create([
+            'idItem' => $item->id,
+            'statusRequest' => 'Pending'
+        ]);
+        $requestItem2 = Requests::factory()->create([
+            'idItem' => $item->id,
+            'statusRequest' => 'Approved'
+        ]);
+        //not counted
+        $requestItem3 = Requests::factory()->create([
+            'idItem' => '3',
+            'statusRequest' => 'Approved'
+        ]);
+        
+        $response = $this->itemController->getItemRequestFromUser($item->id);
+        $this->assertTrue($requestItem1->id === $response->getData()->allitemrequest[0]->id);
+        $this->assertTrue($requestItem2->id === $response->getData()->allitemrequest[1]->id);
     }
     
 }

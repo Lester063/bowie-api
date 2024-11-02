@@ -166,7 +166,7 @@ class ItemController extends Controller
         }
     }
 
-    public function itemRequest($id) {
+    public function getItemRequestFromUser($id) {
         $item = Item::find($id);
         $getAllItemRequest = Requests::where('idItem', $id)->get();
         $getPendingItemRequest = Requests::where('idItem', $id)->where('statusRequest', 'Pending')->get();
