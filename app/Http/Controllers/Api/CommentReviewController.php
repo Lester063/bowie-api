@@ -34,7 +34,7 @@ class CommentReviewController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(),[
-            'rating' => 'required|int|max:11',
+            'rating' => 'required|int|max:5',
             'comment' => 'required|string|max:191|',
             'idRequest' => 'required|max:11',
         ]);
@@ -62,7 +62,7 @@ class CommentReviewController extends Controller
                 ]);
 
                 return response()->json([
-                    'message' => 'You have reviewed on this request successfully.',
+                    'message' => 'Added a review successfully.',
                     'data' => $commentReview
                 ], 200);
             }
