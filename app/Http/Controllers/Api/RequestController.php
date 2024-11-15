@@ -164,8 +164,13 @@ class RequestController extends Controller
         $notificationController = new \App\Http\Controllers\Api\NotificationController;
 
         $requests = Requests::find($id);
-        $allrequests = Requests::where('idItem', $requests['idItem'])->where('statusRequest', 'Pending')->get();
-        $item = Item::find($requests->idItem);
+        $allrequests = $requests ? Requests::where('idItem', $requests['idItem'])
+                        ->where('statusRequest', 'Pending')->get()
+                        :
+                        null;
+        $item = $requests ? Item::find($requests->idItem) 
+                        :
+                        null;
 
         if(!$requests) {
             return response()->json([
@@ -183,15 +188,13 @@ class RequestController extends Controller
             ],422);
         }
         else {
-            $item = Item::find($requests['idItem']);
             if(!$item['isAvailable']) {
                 return response()->json([
                     'message' => 'Item is not available at the moment.'
                 ],422);
             }
             else {
-
-                $approver = User::find(Auth::id());
+                $userInAction = User::find(Auth::id());
 
                 if($request['action']==='Approving') {
                     foreach($allrequests as $singlerequest){
@@ -211,7 +214,7 @@ class RequestController extends Controller
                             //e.g Lester close the request of item OGE
                             $notificationType = 'close the request';
                             $notificationMessage = $notificationController->generateNotificationMessage([
-                                'firstName' => $approver['firstName'],
+                                'firstName' => $userInAction['firstName'],
                                 'type' => $notificationType,
                                 'itemCode' => $item['itemCode']
                             ]);
@@ -240,7 +243,7 @@ class RequestController extends Controller
                     //e.g Lester approve the request of item OGE
                     $notificationType = 'approve the request';
                     $notificationMessage = $notificationController->generateNotificationMessage([
-                        'firstName' => $approver['firstName'],
+                        'firstName' => $userInAction['firstName'],
                         'type' => $notificationType,
                         'itemCode' => $item['itemCode']
                     ]);
@@ -272,7 +275,7 @@ class RequestController extends Controller
                     //e.g Lester decline the request of item OGE
                     $notificationType = 'decline the request';
                     $notificationMessage = $notificationController->generateNotificationMessage([
-                        'firstName' => $approver['firstName'],
+                        'firstName' => $userInAction['firstName'],
                         'type' => $notificationType,
                         'itemCode' => $item['itemCode']
                     ]);
