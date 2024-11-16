@@ -164,10 +164,6 @@ class RequestController extends Controller
         $notificationController = new \App\Http\Controllers\Api\NotificationController;
 
         $requests = Requests::find($id);
-        $allrequests = $requests ? Requests::where('idItem', $requests['idItem'])
-                        ->where('statusRequest', 'Pending')->get()
-                        :
-                        null;
         $item = $requests ? Item::find($requests->idItem) 
                         :
                         null;
@@ -197,14 +193,16 @@ class RequestController extends Controller
                 $userInAction = User::find(Auth::id());
 
                 if($request['action']==='Approving') {
-                    foreach($allrequests as $singlerequest){
-                        if($singlerequest['id'] !== $requests['id']) {
-                            $singlerequest->update([
+                    $allRequests = Requests::where('idItem', $requests['idItem'])
+                    ->where('statusRequest', 'Pending')->get();
+                    foreach($allRequests as $singleRequest){
+                        if($singleRequest['id'] !== $requests['id']) {
+                            $singleRequest->update([
                                 'statusRequest' => 'Closed'
                             ]);
     
                             RequestCommunication::create([
-                                'idRequest' => $singlerequest['id'],
+                                'idRequest' => $singleRequest['id'],
                                 'message' => 'The item you have requested has been processed to other User. 
                                  Therefore, this request will be closed, thank you.',
                                 'idSender' => Auth::id(),
@@ -220,7 +218,7 @@ class RequestController extends Controller
                             ]);
 
                             $notification = $notificationController->sendNotification([
-                                'recipientUserId' => $singlerequest['idRequester'],
+                                'recipientUserId' => $singleRequest['idRequester'],
                                 'senderUserId' => Auth::id(),
                                 'type' => $notificationType,
                                 'notificationMessage' => $notificationMessage,
@@ -267,7 +265,7 @@ class RequestController extends Controller
                         'notification' => $notification
                     ], 200);
                 }
-                else if($request->action==='Declining') {
+                else if($request['action']==='Declining') {
                     $requests->update([
                         'statusRequest' => 'Declined'
                     ]);
@@ -295,7 +293,7 @@ class RequestController extends Controller
                         'notification' => $notification
                     ], 200);
                 }
-                else if($request->action==='Closing') {
+                else if($request['action']==='Closing') {
                     $requests->update([
                         'statusRequest' => 'Closed'
                     ]);
