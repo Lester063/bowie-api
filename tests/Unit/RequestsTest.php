@@ -347,7 +347,7 @@ class RequestsTest extends TestCase
         ]);
     }
 
-    public function testRequestedItemAvailabilityWillBeSetToFalseWhenItemIsApproved(): void
+    public function testRequestedItemAvailabilityWillBeSetToFalseWhenRequestIsApproved(): void
     {
         $user = User::factory()->create();
         $item = Item::factory()->create([
@@ -373,5 +373,158 @@ class RequestsTest extends TestCase
             'itemCode' => $item->itemCode,
             'isAvailable' => false
         ]);
+    }
+
+    public function testActionRequestWhenDecliningRequest(): void
+    {
+        $user = User::factory()->create();
+        $item = Item::factory()->create([
+            'isDeleted' => false,
+            'isAvailable' => true,
+        ]);
+        $requestItem = Requests::factory()->create([
+            'idItem' => $item->id,
+            'statusRequest' => 'Pending'
+        ]);
+        $data = Request::create('/api/requests', 'POST', [
+            'action' => 'Declining'
+        ]);
+
+        $this->actingAs($user);
+        $response = $this->requestsController->actionRequest($data, $requestItem->id);
+
+        $responseData = $response->getData();
+        //message
+        $this->assertTrue($responseData->message === 'Request was declined.');
+        //assert data was updated
+        $this->assertDatabaseHas('requests', [
+            'id' => $requestItem->id,
+            'statusRequest' => 'Declined'
+        ]);
+        //assert notification was sent notifying the user request was declined
+        $this->assertDatabaseHas('notifications', [
+            'senderUserId' => $user->id,
+            'type' =>  'decline the request',
+            'typeValueId' => $requestItem->id,
+            'notificationMessage' => $user->firstName.' decline the request of item '.$item->itemCode.'.'
+        ]);
+    }
+
+    //we don't close the request manually
+    public function testActionRequestWhenClosingRequest(): void
+    {
+        $user = User::factory()->create();
+        $item = Item::factory()->create([
+            'isDeleted' => false,
+            'isAvailable' => true,
+        ]);
+        $requestItem = Requests::factory()->create([
+            'idItem' => $item->id,
+            'statusRequest' => 'Pending'
+        ]);
+        $data = Request::create('/api/requests', 'POST', [
+            'action' => 'Closing'
+        ]);
+
+        $this->actingAs($user);
+        $this->requestsController->actionRequest($data, $requestItem->id);
+        //assert data was updated
+        $this->assertDatabaseHas('requests', [
+            'id' => $requestItem->id,
+            'statusRequest' => 'Closed'
+        ]);
+    }
+
+    public function testActionRequestWhenActionIsUnidentified(): void
+    {
+        $user = User::factory()->create();
+        $item = Item::factory()->create([
+            'isDeleted' => false,
+            'isAvailable' => true,
+        ]);
+        $requestItem = Requests::factory()->create([
+            'idItem' => $item->id,
+            'statusRequest' => 'Pending'
+        ]);
+        $data = Request::create('/api/requests', 'POST', [
+            'action' => 'qwe'
+        ]);
+
+        $this->actingAs($user);
+        $response = $this->requestsController->actionRequest($data, $requestItem->id);
+        $responseData = $response->getData();
+        $this->assertTrue($responseData->message === 'Unidentified action.');
+
+    }
+
+    public function testIShouldSeeAllRequestOfUsers(): void
+    {
+        $userAdmin = User::factory()->create([
+            'isAdmin' => true
+        ]);
+        $userRequester = User::factory()->create([
+            'isAdmin' => false
+        ]);
+        $item1 = Item::factory()->create([
+            'isDeleted' => false,
+            'isAvailable' => true,
+        ]);
+        $item2 = Item::factory()->create([
+            'isDeleted' => false,
+            'isAvailable' => true,
+        ]);
+        $requestItem1 = Requests::factory()->create([
+            'idItem' => $item1->id,
+            'statusRequest' => 'Pending',
+            'idRequester' => $userRequester->id
+        ]);
+        $requestItem2 = Requests::factory()->create([
+            'idItem' => $item2->id,
+            'statusRequest' => 'Pending',
+            'idRequester' => $userRequester->id
+        ]);
+
+        $this->actingAs($userAdmin);
+        $response = $this->requestsController->indexAdmin();
+        $responseData = $response->getData();
+
+        $this->assertCount(2, $responseData->data);
+        $this->assertEquals($requestItem1->id, $responseData->data[0]->id);
+        $this->assertEquals($requestItem2->id, $responseData->data[1]->id);
+    }
+
+    public function testIShouldSeeOnlyMyRequestItem(): void
+    {
+        $userRequester1 = User::factory()->create([
+            'isAdmin' => false
+        ]);
+        $userRequester2 = User::factory()->create([
+            'isAdmin' => false
+        ]);
+        $item1 = Item::factory()->create([
+            'isDeleted' => false,
+            'isAvailable' => true,
+        ]);
+        $item2 = Item::factory()->create([
+            'isDeleted' => false,
+            'isAvailable' => true,
+        ]);
+        $requestItem1 = Requests::factory()->create([
+            'idItem' => $item1->id,
+            'statusRequest' => 'Pending',
+            'idRequester' => $userRequester1->id
+        ]);
+        $requestItem2 = Requests::factory()->create([
+            'idItem' => $item2->id,
+            'statusRequest' => 'Pending',
+            'idRequester' => $userRequester2->id
+        ]);
+
+        $this->actingAs($userRequester1);
+        $response = $this->requestsController->indexUser();
+        $responseData = $response->getData();
+
+        $this->assertCount(1, $responseData->data);
+        $this->assertEquals($requestItem1->id, $responseData->data[0]->id);
     }
 }
