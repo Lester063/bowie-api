@@ -32,11 +32,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('uploadprofile', [AuthController::class,'uploadProfile']);
 
     //request item
-    Route::post('requests', [RequestController::class,'store']);
+    Route::post('requests', [RequestController::class,'requestItem']);
 
-    //get user request/s
-    Route::get('userrequest', [RequestController::class,'indexUser']);
-    Route::get('userrequest/{id}', [RequestController::class,'viewRequest']);
+    //get user request/s, pass the request id
+    Route::get('userrequest', [RequestController::class,'getUserAllRequest']);
+    Route::get('userrequest/{id}', [RequestController::class,'getUserSpecificRequest']);
 
     //request comm -As as User, I would like to follow up with my request status or any queries.
     Route::post('requestcommunication', [RequestCommunicationController::class,'store']);
@@ -69,7 +69,7 @@ Route::middleware('auth:sanctum', 'isAdmin')->group(function(){
     Route::post('items/{id}/edit', [ItemController::class,'update']);
     Route::delete('items/{id}/delete', [ItemController::class,'delete']);
 
-    Route::get('requests', [RequestController::class,'indexAdmin']);
+    Route::get('requests', [RequestController::class,'getAllRequests']);
 
     //request -admin
     Route::put('actionrequest/{id}/edit', [RequestController::class,'actionRequest']);

@@ -17,7 +17,7 @@ class RequestController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function indexAdmin()
+    public function getAllUsersRequests()
     {
         $requests = Requests::join('items', 'items.id', '=', 'requests.idItem')
         ->join('users','users.id','=','requests.idRequester')
@@ -30,7 +30,7 @@ class RequestController extends Controller
         
     }
 
-    public function indexUser()
+    public function getUserAllRequest()
     {
         $requests = Requests::where('idRequester', Auth::id())
         ->join('items', 'items.id', '=', 'requests.idItem')
@@ -43,19 +43,28 @@ class RequestController extends Controller
         ], 200);
     }
 
-    public function viewRequest($id) {
-        $requests = Requests::where('requests.id', $id)
-        ->join('items', 'items.id', '=', 'requests.idItem')
-        ->join('users','users.id','=','requests.idRequester')
-        ->select('*','requests.id as id')->orderBy('requests.created_at','desc')->get();
-
-        return response()->json([
-            'status' => 200,
-            'data' => $requests,
-        ], 200);
+    public function getUserSpecificRequest($id) {
+        $isValidID = Requests::find($id);
+        if($isValidID) {
+            $requests = Requests::where('requests.id', $id)
+            ->join('items', 'items.id', '=', 'requests.idItem')
+            ->join('users','users.id','=','requests.idRequester')
+            ->select('*','requests.id as id')->orderBy('requests.created_at','desc')->get();
+    
+            return response()->json([
+                'status' => 200,
+                'data' => $requests,
+            ], 200);
+        } else {
+            return response()->json([
+                'status' => 400,
+                'message' => 'Unable to find the request id.',
+            ], 400);
+        }
+ 
     }
     
-    public function store(Request $request)
+    public function requestItem(Request $request)
     {
         $notificationController = new \App\Http\Controllers\Api\NotificationController;
 
