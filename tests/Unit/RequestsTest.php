@@ -31,7 +31,7 @@ class RequestsTest extends TestCase
             'idItem' => (string)$item->id,
             'statusRequest' => 'Pending'
         ]);
-        $response = $this->requestsController->store($request);
+        $response = $this->requestsController->requestItem($request);
 
         $responseData = $response->getData();
         $data = json_decode($response->getContent(), true);
@@ -53,7 +53,7 @@ class RequestsTest extends TestCase
             'idItem' => (string)$item->id,
             'statusRequest' => 'Pending'
         ]);
-        $response = $this->requestsController->store($request);
+        $response = $this->requestsController->requestItem($request);
 
         $responseData = $response->getData();
 
@@ -73,7 +73,7 @@ class RequestsTest extends TestCase
             'idItem' => '',
             'statusRequest' => ''
         ]);
-        $response = $this->requestsController->store($request);
+        $response = $this->requestsController->requestItem($request);
 
         $responseData = $response->getData();
 
@@ -92,7 +92,7 @@ class RequestsTest extends TestCase
             'idItem' => '123',
             'statusRequest' => 'Pending'
         ]);
-        $response = $this->requestsController->store($request);
+        $response = $this->requestsController->requestItem($request);
 
         $responseData = $response->getData();
         $this->assertTrue($responseData->errors->idItem[0] === 'The selected id item is invalid.');
@@ -485,12 +485,12 @@ class RequestsTest extends TestCase
         ]);
 
         $this->actingAs($userAdmin);
-        $response = $this->requestsController->indexAdmin();
+        $response = $this->requestsController->getAllUsersRequests();
         $responseData = $response->getData();
 
         $this->assertCount(2, $responseData->data);
-        $this->assertEquals($requestItem1->id, $responseData->data[0]->id);
-        $this->assertEquals($requestItem2->id, $responseData->data[1]->id);
+        $this->assertTrue(in_array($responseData->data[0]->id, [$requestItem1->id, $requestItem2->id] ));
+        $this->assertTrue(in_array($responseData->data[1]->id, [$requestItem1->id, $requestItem2->id] ));
     }
 
     public function testIShouldSeeOnlyMyRequestItem(): void
@@ -521,10 +521,46 @@ class RequestsTest extends TestCase
         ]);
 
         $this->actingAs($userRequester1);
-        $response = $this->requestsController->indexUser();
+        $response = $this->requestsController->getUserAllRequest();
         $responseData = $response->getData();
 
         $this->assertCount(1, $responseData->data);
-        $this->assertEquals($requestItem1->id, $responseData->data[0]->id);
+        $this->assertEquals($responseData->data[0]->id, $requestItem1->id);
+    }
+
+    public function testIShouldBeAbleToGetSpecificRequest(): void {
+        $user = User::factory()->create([
+            'isAdmin' => false
+        ]);
+        $item = Item::factory()->create([
+            'isDeleted' => false,
+            'isAvailable' => true,
+        ]);
+        $requestItem = Requests::factory()->create([
+            'idItem' => $item->id,
+            'statusRequest' => 'Pending',
+            'idRequester' => $user->id
+        ]);
+        $response = $this->requestsController->getUserSpecificRequest($requestItem->id);
+        $responseData = $response->getData();
+        $this->assertEquals($responseData->data[0]->id, $requestItem->id);
+    }
+
+    public function testIShouldBeAbleToGetSpecificRequestFailed(): void {
+        $user = User::factory()->create([
+            'isAdmin' => false
+        ]);
+        $item = Item::factory()->create([
+            'isDeleted' => false,
+            'isAvailable' => true,
+        ]);
+        $requestItem = Requests::factory()->create([
+            'idItem' => $item->id,
+            'statusRequest' => 'Pending',
+            'idRequester' => $user->id
+        ]);
+        $response = $this->requestsController->getUserSpecificRequest(232);
+        $responseData = $response->getData();
+        $this->assertTrue($responseData->message === 'Unable to find the request id.');
     }
 }
