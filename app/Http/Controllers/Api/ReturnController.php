@@ -68,7 +68,7 @@ class ReturnController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function returnItem(Request $request)
     {
         $notificationController = new \App\Http\Controllers\Api\NotificationController;
 
@@ -167,7 +167,7 @@ class ReturnController extends Controller
         //
     }
 
-    public function approve(Request $request, string $id)
+    public function approveReturn(Request $request, string $id)
     {
         $notificationController = new \App\Http\Controllers\Api\NotificationController;
         $return = Returns::find($id);

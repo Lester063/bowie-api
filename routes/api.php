@@ -44,7 +44,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('readmessage/{id}', [RequestCommunicationController::class,'readUnreadMessage']);
 
     //return item
-    Route::post('return', [ReturnController::class,'store']);
+    Route::post('return', [ReturnController::class,'returnItem']);
     //return - user view
     Route::get('userreturns', [ReturnController::class,'indexUser']);
     Route::get('return/{id}', [ReturnController::class,'viewReturn']);
@@ -76,7 +76,7 @@ Route::middleware('auth:sanctum', 'isAdmin')->group(function(){
 
 
     //return - approve 
-    Route::put('return/{id}/approve', [ReturnController::class,'approve']);
+    Route::put('return/{id}/approve', [ReturnController::class,'approveReturn']);
     //return - admin view
     Route::get('returns', [ReturnController::class,'indexAdmin']);
 
