@@ -68,6 +68,7 @@ class RequestCommunicationTest extends TestCase
         $requests = Requests::factory()->create([
             'idRequester' => 10
         ]);
+        $user = User::factory()->create([
             'isAdmin' => false
         ]);
         $this->actingAs($user);
