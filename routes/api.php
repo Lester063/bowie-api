@@ -3,10 +3,10 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\api\AuthController;
-use App\Http\Controllers\api\ItemController;
-use App\Http\Controllers\api\ReturnController;
-use App\Http\Controllers\api\RequestController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ItemController;
+use App\Http\Controllers\Api\ReturnController;
+use App\Http\Controllers\Api\RequestController;
 use App\Http\Controllers\Api\RequestCommunicationController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\CommentReviewController;
